@@ -4,6 +4,7 @@ namespace APCore
 {
     public class WeatherForecast
     {
+        //contro
         public DateTime Date { get; set; }
 
         public int TemperatureC { get; set; }
