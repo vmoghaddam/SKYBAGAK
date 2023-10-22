@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+
+// Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
+// If you have enabled NRTs for your project, then un-comment the following line:
+// #nullable disable
+
+namespace APWeather.Models
+{
+    public partial class SumEmployeeJobGroup
+    {
+        public int CustomerId { get; set; }
+        public string GroupCode { get; set; }
+        public string RootTitle { get; set; }
+        public int? Count { get; set; }
+    }
+}

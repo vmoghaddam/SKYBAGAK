@@ -1,0 +1,38 @@
+﻿using System;
+using System.Collections.Generic;
+
+// Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
+// If you have enabled NRTs for your project, then un-comment the following line:
+// #nullable disable
+
+namespace APWeather.Models
+{
+    public partial class ViewFormAYearlyInt
+    {
+        public int Year { get; set; }
+        public int? Legs { get; set; }
+        public decimal? FlightHour { get; set; }
+        public int? PaxChild { get; set; }
+        public int? PaxInfant { get; set; }
+        public int? PaxAdult { get; set; }
+        public int? PaxTotal { get; set; }
+        public double? PaxTotalDistRound { get; set; }
+        public double? PaxTotalDist { get; set; }
+        public int? PaxAll { get; set; }
+        public int? TotalSeat { get; set; }
+        public double? TotalSeatDist { get; set; }
+        public int? PaxLoad { get; set; }
+        public double? TotalSeatDistRound { get; set; }
+        public int? PaxAllWeight { get; set; }
+        public double? PaxAllWeightDistance { get; set; }
+        public int? BaggageWeight { get; set; }
+        public int? CargoWeight { get; set; }
+        public int? Freight { get; set; }
+        public decimal? FreightTone { get; set; }
+        public double? FreightToneDistance { get; set; }
+        public double? TotalToneDistance { get; set; }
+        public double? TotalToneDistanceAvailable { get; set; }
+        public double? WeightLoadFactor { get; set; }
+        public double? Distance { get; set; }
+    }
+}

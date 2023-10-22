@@ -1,0 +1,28 @@
+﻿using System;
+using System.Collections.Generic;
+
+// Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
+// If you have enabled NRTs for your project, then un-comment the following line:
+// #nullable disable
+
+namespace APWeather.Models
+{
+    public partial class CaoBasic
+    {
+        public CaoBasic()
+        {
+            CaoBasicType = new HashSet<CaoBasicType>();
+            PersonCaoLicense = new HashSet<PersonCaoLicense>();
+        }
+
+        public int Id { get; set; }
+        public int? CaoBasicLicenseTypeId { get; set; }
+        public string Title { get; set; }
+        public string CaoGroup { get; set; }
+        public string Remark { get; set; }
+
+        public virtual CaoBasicLicenseType CaoBasicLicenseType { get; set; }
+        public virtual ICollection<CaoBasicType> CaoBasicType { get; set; }
+        public virtual ICollection<PersonCaoLicense> PersonCaoLicense { get; set; }
+    }
+}
