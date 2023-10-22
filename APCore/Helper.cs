@@ -8,6 +8,7 @@ namespace APCore
     public class Helper {
         public static DateTime? ConvertToDate(string dt)
         {
+            //comment
             if (string.IsNullOrEmpty(dt))
                 return null;
             var prts = dt.Split("-").Select(q=>Convert.ToInt32(q)).ToList();
