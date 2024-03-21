@@ -122,6 +122,15 @@ namespace APWeather.Controllers
             return Ok(result);
         }
 
+        [Route("metar/adds/all/new")]
+        public async Task<ActionResult> GetMETARADDS_All_New()
+        {
+            var result = await _weatherService.GetMETAR_ADDS_ALL_NEW();
+            if (!result.IsSuccess)
+                return NotFound(result.Errors);
+            return Ok(result);
+        }
+
         [Route("taf/adds/all")]
         public async Task<ActionResult> GetTAFADDS_All()
         {
@@ -182,6 +191,13 @@ namespace APWeather.Controllers
         public async Task<ActionResult> GetWX()
         {
             var result = await _weatherService.GetWX();
+
+            return Ok(result);
+        }
+        [Route("wxmetar")]
+        public async Task<ActionResult> GetWXMetar()
+        {
+            var result = await _weatherService.GetWXMetar();
 
             return Ok(result);
         }

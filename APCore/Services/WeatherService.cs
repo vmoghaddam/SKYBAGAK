@@ -18,6 +18,9 @@ using System.Drawing;
 using HtmlAgilityPack;
 using ImageMagick;
 using System.Text.RegularExpressions;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace APCore.Services
 {
@@ -33,6 +36,7 @@ namespace APCore.Services
     public interface IWeatherService
     {
         Task<DataResponse> GetSIGWX_ADDS(string doc);
+        Task<DataResponse> GetSIGWX_Charts();
         Task<DataResponse> GetSIGWX_ADDS_UPDATE();
         Task<DataResponse> GetSIGWX_ADDS_Date(string dt);
         Task<DataResponse> GetWIND_ADDS_IMG(string fl, string dtstr = "");
@@ -47,7 +51,8 @@ namespace APCore.Services
         Task<DataResponse> GetSIGWX_IRIMO();
         Task<DataResponse> GetFlightFolder_IRIMO();
         Task<DataResponse> GetTAFMETAR_METNO(string icao, string date, int useoffset, string type);
-       
+        Task<DataResponse> GetAvmetAsync3();
+
 
     }
     public class WeatherService : IWeatherService
@@ -590,6 +595,261 @@ namespace APCore.Services
                 IsSuccess = true
             };
         }
+        public class simbrief_obj
+        {
+            public string name { get; set; }
+            public DateTime date { get; set; }
+            public string url { get; set; }
+        }
+        public class simbrief_area
+        {
+            public List<simbrief_obj> PGZE05 { get; set; }
+        }
+
+        public class simbrief_wx
+        {
+            public simbrief_area sigwx { get; set; }
+        }
+
+
+
+        public async Task<DataResponse> GetAvmetAsync3()
+        {
+            string webRootPath = _webHostEnvironment.ContentRootPath;
+            var baseUrl = "https://www.avmet.ae/";
+            var url = baseUrl + "metcharts.aspx?prod=SW&id=0";
+
+            WebClient myWebClient = new WebClient();
+            byte[] myDataBuffer = myWebClient.DownloadData(url);
+            string responseText = Encoding.ASCII.GetString(myDataBuffer);
+
+            HtmlDocument htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(responseText);
+
+            var sigwx00 = htmlDoc.DocumentNode.SelectSingleNode("//img[@id='TabContainer1_TabPanel1_imgsigwx00']");
+            var sigwx06 = htmlDoc.DocumentNode.SelectSingleNode("//img[@id='TabContainer1_TabPanel2_imgsigwx06']");
+            var sigwx12 = htmlDoc.DocumentNode.SelectSingleNode("//img[@id='TabContainer1_TabPanel3_imgsigwx12']");
+            var sigwx18 = htmlDoc.DocumentNode.SelectSingleNode("//img[@id='TabContainer1_TabPanel4_imgsigwx18']");
+
+
+            var response = new
+            {
+                sigwx00 = baseUrl + sigwx00.Attributes["src"].Value,
+                sigwx06 = baseUrl + sigwx06.Attributes["src"].Value,
+                sigwx12 = baseUrl + sigwx12.Attributes["src"].Value,
+                sigwx18 = baseUrl + sigwx18.Attributes["src"].Value
+            };
+            var today_str = DateTime.Now.Date.ToString("yyyyMMdd") + "-sig";
+            string path = "";
+            byte[] data;
+            using (WebClient webClient = new WebClient())
+            {
+                try
+                {
+                    path = today_str + "00.png";
+                    path = Path.Combine(webRootPath, "Upload", "Weather", "AVMET", path);
+                    data = webClient.DownloadData(response.sigwx00);
+                    using (MemoryStream mem = new MemoryStream(data))
+                    {
+                        using (var yourImage = System.Drawing.Image.FromStream(mem))
+                        {
+
+                            yourImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
+                            yourImage.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+
+                }
+                System.Threading.Thread.Sleep(3000);
+                try
+                {
+                    path = today_str + "06.png";
+                    path = Path.Combine(webRootPath, "Upload", "Weather", "AVMET", path);
+                    data = webClient.DownloadData(response.sigwx06);
+                    using (MemoryStream mem = new MemoryStream(data))
+                    {
+                        using (var yourImage = System.Drawing.Image.FromStream(mem))
+                        {
+
+                            yourImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
+                            yourImage.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
+
+                System.Threading.Thread.Sleep(3000);
+                try
+                {
+                    path = today_str + "12.png";
+                    path = Path.Combine(webRootPath, "Upload", "Weather", "AVMET", path);
+                    data = webClient.DownloadData(response.sigwx12);
+                    using (MemoryStream mem = new MemoryStream(data))
+                    {
+                        using (var yourImage = System.Drawing.Image.FromStream(mem))
+                        {
+
+                           yourImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
+                            yourImage.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
+                System.Threading.Thread.Sleep(3000);
+                try
+                {
+
+                    path = today_str + "18.png";
+                    path = Path.Combine(webRootPath, "Upload", "Weather", "AVMET", path);
+                    data = webClient.DownloadData(response.sigwx18);
+                    using (MemoryStream mem = new MemoryStream(data))
+                    {
+                        using (var yourImage = System.Drawing.Image.FromStream(mem))
+                        {
+
+                            yourImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
+                            yourImage.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
+
+
+
+            }
+
+
+
+                return new DataResponse
+            {
+                Data = response,
+                Errors = null,
+                IsSuccess = true
+            };
+        }
+
+        //GetSIGWX_Charts
+        public async Task<DataResponse> GetSIGWX_Charts()
+        {
+            //var result = new List<string>();
+            //var url = "https://api.simbrief.com/v2/plates";
+
+            //var req = new HttpRequestMessage(HttpMethod.Get, url);
+            //var token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjA0X3JsNjNvV2ZBSVc3WEd4UWUzQzVEY3dkTSIsImtpZCI6IjA0X3JsNjNvV2ZBSVc3WEd4UWUzQzVEY3dkTSJ9.eyJpc3MiOiJodHRwczovL2lkZW50aXR5LmFwaS5uYXZpZ3JhcGguY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eS5hcGkubmF2aWdyYXBoLmNvbS9yZXNvdXJjZXMiLCJleHAiOjE3MDE0NDA1MzEsIm5iZiI6MTcwMTQzNjkzMSwiY2xpZW50X2lkIjoic2ltYnJpZWYiLCJzY29wZSI6WyJvcGVuaWQiLCJvZmZsaW5lX2FjY2VzcyIsImZtc2RhdGEiLCJzaW1icmllZiJdLCJzdWIiOiJmN2JmNTA5My0zYmJhLTQ3NmMtOGVhZC0zYTU0YTE0OWIxNjEiLCJhdXRoX3RpbWUiOjE3MDE0MjM3NTEsImlkcCI6Im5hdmlncmFwaCIsImFtciI6WyJwYXNzd29yZCJdLCJzdWJzY3JpcHRpb25zIjpbXX0.RkFkO3Zuh66jz4BtuRu4BB6uD7JOXNlrjBFMn2P1fJr94VRMsfa7TYlS-pvlUk0NrczK0_uVqWfWowJbRuZLmKSvvvG0HBQY68cUag9a7bdSBMIlCLG5C7pPcyr090AM7SFRdcFcWZkUH7Cw5cYUx9Z6xPNLybsjXSPQFzPGZcfuIoRvGOLDJEJvvvxucIsA-3VH-9j3_3HMhriJu6CatiHJIiKa4USKochiuUCD44C6ZDom8N4l6YG_h5anZNXT9vqaW7fSsLG6HKAepxpAZSg1QLKrhyvaPqgUCFcM3VgwLBrSRlnG3qnVjD5233ZVOCBWxHP8qtwhCO46A9aZKw";
+            //req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            //using (HttpClient webClient = new HttpClient())
+            //{
+            //    var response =await webClient.SendAsync(req);
+            //    string output = await response.Content.ReadAsStringAsync();
+            //    var objx =   JsonConvert.DeserializeObject<simbrief_wx>(output);
+
+            //}
+            string webRootPath = _webHostEnvironment.ContentRootPath;
+
+            var url00= "https://hezarfen.mgm.gov.tr/Genel/imgKrtPng.ashx?cevir=1&syol=PGZE06_0000.png";
+            var url06 = "https://hezarfen.mgm.gov.tr/Genel/imgKrtPng.ashx?cevir=1&syol=PGZE06_0600.png";
+            var url12 = "https://hezarfen.mgm.gov.tr/Genel/imgKrtPng.ashx?cevir=1&syol=PGZE06_1200.png";
+            var url18 = "https://hezarfen.mgm.gov.tr/Genel/imgKrtPng.ashx?cevir=1&syol=PGZE06_1800.png";
+
+            var today_str = DateTime.Now.Date.ToString("yyyyMMdd")+"_";
+            var tomorrow_str = DateTime.Now.AddDays(1).Date.ToString("yyyyMMdd")+"_";
+            using (WebClient webClient = new WebClient())
+            {
+                string path = "sigwx_" + today_str + "0000.png";
+                path = Path.Combine(webRootPath, "Upload", "Weather", "SIGWX", "ADDS", path);
+                byte[] data = webClient.DownloadData(url00);
+                using (MemoryStream mem = new MemoryStream(data))
+                {
+                    using (var yourImage = System.Drawing.Image.FromStream(mem))
+                    {
+                         
+                        yourImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                       
+                        yourImage.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+                        
+                    }
+                }
+                  path = "sigwx_" + today_str + "0006.png";
+                path = Path.Combine(webRootPath, "Upload", "Weather", "SIGWX", "ADDS", path);
+                  data = webClient.DownloadData(url06);
+                using (MemoryStream mem = new MemoryStream(data))
+                {
+                    using (var yourImage = System.Drawing.Image.FromStream(mem))
+                    {
+
+                        yourImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
+
+                        yourImage.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+
+                    }
+                }
+
+                  path = "sigwx_" + today_str + "0012.png";
+                path = Path.Combine(webRootPath, "Upload", "Weather", "SIGWX", "ADDS", path);
+                  data = webClient.DownloadData(url12);
+                using (MemoryStream mem = new MemoryStream(data))
+                {
+                    using (var yourImage = System.Drawing.Image.FromStream(mem))
+                    {
+
+                        yourImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
+
+                        yourImage.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+
+                    }
+                }
+
+
+                  path = "sigwx_" + today_str + "0018.png";
+                path = Path.Combine(webRootPath, "Upload", "Weather", "SIGWX", "ADDS", path);
+                  data = webClient.DownloadData(url18);
+                using (MemoryStream mem = new MemoryStream(data))
+                {
+                    using (var yourImage = System.Drawing.Image.FromStream(mem))
+                    {
+
+                        yourImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
+
+                        yourImage.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+
+                    }
+                }
+
+
+
+            }
+           
+
+
+            return new DataResponse
+            {
+                Data = "",
+                Errors = null,
+                IsSuccess = true
+            };
+        }
+
 
 
         public async Task<DataResponse> GetTAFMETAR_METNO(string icao, string date, int useoffset, string type)

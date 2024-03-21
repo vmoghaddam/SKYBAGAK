@@ -116,10 +116,13 @@ namespace APCore
             }
             // Enable Cors
             //app.UseCors("AllowOrigin");
+         
             app.UseCors(builder => builder
-     .AllowAnyOrigin()
-     .AllowAnyMethod()
-     .AllowAnyHeader());
+      .AllowAnyOrigin()
+    .AllowAnyMethod()
+      .AllowAnyHeader());
+
+
             app.UseHttpsRedirection();
 
             app.UseRouting();

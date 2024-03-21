@@ -1,0 +1,105 @@
+﻿.dx-theme-material-typography {
+    background-color: #363640 !important;
+     
+}
+.icon-bar a {
+    color: #d45050;
+}
+    .icon-bar a:hover {
+        /* background-color: #d45050;*/
+        background-color: transparent !important;
+        color: #d45050;
+    }
+
+.app-headerx-client {
+    padding: 7px 5px 3px 5px;
+    background-color: #cd3232;
+    color: white;
+    font-size: 15px;
+}
+.theme-orange {
+    border-bottom: 2px solid #ff6699;
+}
+.main-color {
+    color: #d45050;
+}
+.main-bkcolor {
+    background: #d45050;
+    color:white;
+}
+.main-bkcolor2 {
+    background: #363640;
+     color:white;
+}
+
+.tile-folder {
+    background-color: #334d4d;
+    color: white;
+    border: 1px solid #ccc;
+    margin: 6px 6px 0 6px;
+}
+.tile-item {
+    background-color: #464653;
+    color: white;
+    border: 1px solid #ccc;
+    margin: 6px 6px 0 6px;
+}
+.dx-popup-title {
+    background: #d45050;
+    
+    color: white;
+}
+.dx-popup-bottom {
+    background: #363640;
+    color:white;
+}
+.main-bkcolor2-imp {
+    background: #363640 !important;
+    color: white;
+}
+.main-bkcolor2-light-imp {
+    background: #464653 !important;
+    color: white;
+}
+    .main-bkcolor2-light-imp.selected {
+        background: #cd3232 !important;
+        color: white;
+    }
+.main-button {
+    background: #d45050;
+    color:white;
+    padding:10px;
+    text-align:center;
+    font-weight:bold;
+}
+.section-header {
+    /*background: #404040;*/
+    font-weight:bold;
+}
+.section-table{
+    width:100%;
+}
+.section-table tr{
+    border-bottom:1px solid #bbb;
+}
+    .section-table tr td {
+       padding:7px;
+       width:25%;
+    }
+        .section-table tr td:nth-child(odd) {
+            text-align: left;
+            color: #d9d9d9
+        }
+        .section-table tr td:nth-child(even) {
+            text-align: right;
+            color: white;
+        }
+        .section-table tr td:nth-child(even) span {
+            color: white;
+        }
+        .section-table tr td:nth-child(odd) span {
+            color: #d9d9d9;
+        }
+
+
+

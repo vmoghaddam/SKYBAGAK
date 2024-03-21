@@ -29,6 +29,33 @@ namespace APCore.Controllers
             _flightService = flightService;
         }
 
+        [HttpGet]
+        //[Authorize]
+        [Route("api/weather/sigwx/charts/")]
+        public async Task<IActionResult> GetSIGWX_CHARTS()
+        {
+            //  var userData = User.FindFirst(ClaimTypes.UserData).Value;
+
+            var result = await _weatherService.GetSIGWX_Charts();
+            if (!result.IsSuccess)
+                return NotFound(result.Errors);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        //[Authorize]
+        [Route("api/weather/sigwx/charts/avmet")]
+        public async Task<IActionResult> GetSIGWX_AVMET_CHARTS()
+        {
+            //  var userData = User.FindFirst(ClaimTypes.UserData).Value;
+
+            var result = await _weatherService.GetAvmetAsync3();
+            if (!result.IsSuccess)
+                return NotFound(result.Errors);
+            return Ok(result);
+        }
+
+
 
         [HttpGet]
         //[Authorize]

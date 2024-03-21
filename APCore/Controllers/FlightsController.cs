@@ -506,10 +506,21 @@ namespace APCore.Controllers
         {
             // var userData = User.FindFirst(ClaimTypes.UserData).Value;
             //var crewId = Objects.AuthDataHelper.GetEmployeeId(userData);
-            var result = await _flightService.GetOFPProps(ofpId);
-            if (!result.IsSuccess)
-                return NotFound(result.Errors);
-            return Ok(result);
+            try
+            {
+                var result = await _flightService.GetOFPProps(ofpId);
+                if (!result.IsSuccess)
+                    return NotFound(result.Errors);
+                return Ok(result);
+            }
+            catch(Exception ex)
+            {
+                var msg = ex.Message;
+                if (ex.InnerException != null)
+                    msg += ex.InnerException.Message;
+                return Ok(msg);
+            }
+           
         }
 
         [HttpPost]

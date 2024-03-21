@@ -34,11 +34,13 @@ namespace APWeather.Services
         Task<DataResponse> GetFlightTafs(int flt);
 
         Task<DataResponse> GetMETAR_ADDS_ALL();
+        Task<DataResponse> GetMETAR_ADDS_ALL_NEW();
         Task<DataResponse> GetTAF_ADDS_All();
         Task<DataResponse> GetAirportNotamAll();
 
 
         Task<DataResponse> GetWX();
+        Task<DataResponse> GetWXMetar();
         Task<object> GetMetarByDateNow();
         Task<object> GetTafByDateNow();
         Task<object> GetNotamByDateNow();
@@ -454,7 +456,121 @@ namespace APWeather.Services
 
 
         }
+        //2024-02-06
+        public class metar_obj
+        {
+            public string station { get; set; }
+            public string time { get; set; }
+            public string metar { get; set; }
+            public DateTime obs_time { get; set; }
+        }
+        public async Task<DataResponse> GetMETAR_ADDS_ALL_NEW()
+        {
+            var stations = await _context.Airport.Where(q =>  
+           q.ICAO.StartsWith("OI") 
+           //|| q.ICAO.StartsWith("OR")
+           // || q.ICAO.StartsWith("UT")
+           // || q.ICAO.StartsWith("UG")
+           //  || q.ICAO.StartsWith("OK")
+           //  || q.ICAO.StartsWith("LT")
+           //  || q.ICAO.StartsWith("UDYZ")
 
+           ).Select(q => q.ICAO).ToListAsync();
+
+            var station_dic = new Dictionary<string, List<string>>();
+            station_dic.Add("OI", stations.Where(q => q.StartsWith("OI")).ToList());
+            station_dic.Add("OR", stations.Where(q => q.StartsWith("OR")).ToList());
+            station_dic.Add("UT", stations.Where(q => q.StartsWith("UT")).ToList());
+            station_dic.Add("UG", stations.Where(q => q.StartsWith("UG")).ToList());
+            station_dic.Add("OK", stations.Where(q => q.StartsWith("OK")).ToList());
+            station_dic.Add("LT", stations.Where(q => q.StartsWith("LT")).ToList());
+
+            station_dic.Add("UD", stations.Where(q => q.StartsWith("UD")).ToList());
+
+            foreach (var kv in station_dic)
+            {
+                var key = kv.Key;
+
+            }
+
+            var _year = DateTime.Now.Year;
+            var _month = DateTime.Now.Month;
+            var _index = 0;
+            var _station_grps = stations.GroupBy(x => _index++ / 10).ToList();
+            List<metar_obj> raws = new List<metar_obj>();
+            List<string> commands = new List<string>();
+
+            foreach (var station in stations /*var station_grp in _station_grps*/)
+            {
+                // var _station_str = string.Join(',', station_grp.ToList());
+                using (WebClient webClient = new WebClient())
+                {
+                    try
+                    {
+                        var url = "https://aviationweather.gov/cgi-bin/data/metar.php?ids=" + station + "&hours=0&order=id%20C-obs&sep=true";
+                        var str = webClient.DownloadString(url);
+                        str = str.Replace("\n", "");
+                        if (!string.IsNullOrEmpty(str))
+                        {
+                            //LTAG 061120Z
+                            var _time = str.Split(' ')[1];
+                            var _day = Convert.ToInt32(str.Substring(5, 2));
+                            var _hour = Convert.ToInt32(str.Substring(7, 2));
+                            var _minute = Convert.ToInt32(str.Substring(9, 2));
+                            var _key = str.Substring(5, 7);
+
+                            var _obs_time = new DateTime(_year, _month, _day, _hour, _minute, 0);
+                            commands.Add("DELETE FROM WeatherMetar WHERE STATIONID='" + station + "' AND flight_category='" + _key + "';");
+
+
+
+                            // var _obs_time = new DateTime(_year, _month, _day, )) ;; ;
+                            raws.Add(new metar_obj() { station = station, metar = str, time = _time, obs_time = _obs_time });
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        var fff = 0;
+                    }
+
+
+
+                }
+
+            }
+
+            if (commands.Count > 0)
+            {
+                _context.Database.ExecuteSqlCommand(string.Join("", commands));
+            }
+            await _context.SaveAsync();
+            foreach (var x in raws)
+            {
+                _context.WeatherMetar.Add(new WeatherMetar()
+                {
+                    StationId = x.station,
+                    observation_time = x.obs_time,
+                    DateCreate = DateTime.Now,
+                    DateDay = x.obs_time.Date,
+                    RawText = x.metar,
+                    flight_category = x.time,
+                });
+            }
+            await _context.SaveAsync();
+
+
+
+
+
+            return new DataResponse
+            {
+                Data = raws,
+                Errors = null,
+                IsSuccess = true
+            };
+
+        }
         public async Task<DataResponse> GetMETAR_ADDS_ALL()
         {
 
@@ -466,7 +582,13 @@ namespace APWeather.Services
                || q.ICAO.StartsWith("UDYZ")
 
             ).Select(q => q.ICAO).ToListAsync();
-          //  stations = new List<string>() { "OIII" };
+
+
+            // var stations = await _context.Airport.Where(q =>  q.ICAO.StartsWith("OR")
+
+
+            //).Select(q => q.ICAO).ToListAsync();
+            //  stations = new List<string>() { "OIII" };
             // var oldTafs = await _context.WeatherTafs.Where(q => stations.Contains(q.StationId)).ToListAsync();
 
             var baseDate = DateTime.Now.Date;
@@ -477,7 +599,7 @@ namespace APWeather.Services
             else
                 offset1 = "+0430";
             //var from = baseDate.Date.ToString("yyyy-MM-dd") + "T00:00:00" + offset1;
-            var from = DateTime.Now.ToString("yyyy-MM-dd") +"T"+ DateTime.Now.AddHours(-2).ToString("HH:mm")+ ":00" + offset1;
+            var from = DateTime.Now.ToString("yyyy-MM-dd") + "T" + DateTime.Now.AddHours(-2).ToString("HH:mm") + ":00" + offset1;
             var to = DateTime.Now.Date.AddDays(1).Date.ToString("yyyy-MM-dd") + "T00:00:00" + offset1;
 
             var d_from = DateTime.Now.AddHours(-2);
@@ -521,14 +643,14 @@ namespace APWeather.Services
                 try
                 {
                     var _station_str = string.Join(',', station_grp.ToList());
-                  //  var url = "https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=metars&requestType=retrieve&format=xml&stationString="
-                  var url= "https://aviationweather.gov/cgi-bin/data/dataserver.php?dataSource=metars&requestType=retrieve&format=xml&stationString="
-                //+ station
-                + _station_str
-                + "&hoursBeforeNow=3"
-                //+ "&startTime=" + from
-                //+ "&endTime=" + to
-                ;
+                    //  var url = "https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=metars&requestType=retrieve&format=xml&stationString="
+                    var url = "https://aviationweather.gov/cgi-bin/data/dataserver.php?dataSource=metars&requestType=retrieve&format=xml&stationString="
+                  //+ station
+                  + _station_str
+                  + "&hoursBeforeNow=3"
+                  //+ "&startTime=" + from
+                  //+ "&endTime=" + to
+                  ;
 
                     XElement xml = XElement.Load(url);
                     var tafElements = xml.Descendants("METAR").ToList();
@@ -542,39 +664,39 @@ namespace APWeather.Services
                             StationId = (string)item.Element("station_id"),
                             observation_time = string.IsNullOrEmpty((string)item.Element("observation_time")) ? null : (Nullable<DateTime>)Convert.ToDateTime((string)item.Element("observation_time")).ToUniversalTime(),
 
-                           // latitude = Convert.ToDouble((string)item.Element("latitude")),
-                           // longitude = Convert.ToDouble((string)item.Element("longitude")),
-                           // temp_c = Convert.ToDouble((string)item.Element("temp_c")),
+                            // latitude = Convert.ToDouble((string)item.Element("latitude")),
+                            // longitude = Convert.ToDouble((string)item.Element("longitude")),
+                            // temp_c = Convert.ToDouble((string)item.Element("temp_c")),
 
-                           // dewpoint_c = Convert.ToDouble((string)item.Element("dewpoint_c")),
-                           // wind_dir_degrees = Convert.ToInt32((string)item.Element("wind_dir_degrees")),
-                           // wind_speed_kt = Convert.ToInt32((string)item.Element("wind_speed_kt")),
-                          //  wind_gust_kt = Convert.ToInt32((string)item.Element("wind_gust_kt")),
-                          //  visibility_statute_mi = Convert.ToDouble((string)item.Element("visibility_statute_mi")),
-                          //  altim_in_hg = Convert.ToDouble((string)item.Element("altim_in_hg")),
-                           // sea_level_pressure_mb = Convert.ToDouble((string)item.Element("sea_level_pressure_mb")),
-                           // flight_category = (string)item.Element("flight_category"),
-                           // three_hr_pressure_tendency_mb = Convert.ToDouble((string)item.Element("three_hr_pressure_tendency_mb")),
-                           // maxT_c = Convert.ToDouble((string)item.Element("maxT_c")),
-                          //  minT_c = Convert.ToDouble((string)item.Element("minT_c")),
-                           // maxT24hr_c = Convert.ToDouble((string)item.Element("maxT24hr_c")),
-                           // minT24hr_c = Convert.ToDouble((string)item.Element("minT24hr_c")),
-                          //  precip_in = Convert.ToDouble((string)item.Element("precip_in")),
-                           // pcp3hr_in = Convert.ToDouble((string)item.Element("pcp3hr_in")),
-                           // pcp6hr_in = Convert.ToDouble((string)item.Element("pcp6hr_in")),
-                           // pcp24hr_in = Convert.ToDouble((string)item.Element("pcp24hr_in")),
-                           // snow_in = Convert.ToDouble((string)item.Element("snow_in")),
-                           // vert_vis_ft = Convert.ToInt32((string)item.Element("vert_vis_ft")),
-                          //  metar_type = (string)item.Element("metar_type"),
-                           // elevation_m = Convert.ToDouble((string)item.Element("elevation_m")),
+                            // dewpoint_c = Convert.ToDouble((string)item.Element("dewpoint_c")),
+                            // wind_dir_degrees = Convert.ToInt32((string)item.Element("wind_dir_degrees")),
+                            // wind_speed_kt = Convert.ToInt32((string)item.Element("wind_speed_kt")),
+                            //  wind_gust_kt = Convert.ToInt32((string)item.Element("wind_gust_kt")),
+                            //  visibility_statute_mi = Convert.ToDouble((string)item.Element("visibility_statute_mi")),
+                            //  altim_in_hg = Convert.ToDouble((string)item.Element("altim_in_hg")),
+                            // sea_level_pressure_mb = Convert.ToDouble((string)item.Element("sea_level_pressure_mb")),
+                            // flight_category = (string)item.Element("flight_category"),
+                            // three_hr_pressure_tendency_mb = Convert.ToDouble((string)item.Element("three_hr_pressure_tendency_mb")),
+                            // maxT_c = Convert.ToDouble((string)item.Element("maxT_c")),
+                            //  minT_c = Convert.ToDouble((string)item.Element("minT_c")),
+                            // maxT24hr_c = Convert.ToDouble((string)item.Element("maxT24hr_c")),
+                            // minT24hr_c = Convert.ToDouble((string)item.Element("minT24hr_c")),
+                            //  precip_in = Convert.ToDouble((string)item.Element("precip_in")),
+                            // pcp3hr_in = Convert.ToDouble((string)item.Element("pcp3hr_in")),
+                            // pcp6hr_in = Convert.ToDouble((string)item.Element("pcp6hr_in")),
+                            // pcp24hr_in = Convert.ToDouble((string)item.Element("pcp24hr_in")),
+                            // snow_in = Convert.ToDouble((string)item.Element("snow_in")),
+                            // vert_vis_ft = Convert.ToInt32((string)item.Element("vert_vis_ft")),
+                            //  metar_type = (string)item.Element("metar_type"),
+                            // elevation_m = Convert.ToDouble((string)item.Element("elevation_m")),
 
                             FlightId = null,
                             FDPId = null,
 
                         };
                         obs_times.Add((DateTime)metar.observation_time);
-                       // metar.WeatherMetarSkyCondition = getSkyConditionsMETAR(item);
-                       // metar.WeatherMetarQualityControl = getQualityControlMETAR(item);
+                        // metar.WeatherMetarSkyCondition = getSkyConditionsMETAR(item);
+                        // metar.WeatherMetarQualityControl = getQualityControlMETAR(item);
                         //_context.WeatherMetar.Add(metar);
                         result.Add(metar);
                     }
@@ -602,8 +724,8 @@ namespace APWeather.Services
 
 
             //var cnn = Configuration.GetConnectionString("EPDB");
-          //  ppa_vareshContext _scontext = new ppa_vareshContext();
-           // _scontext.ChangeTracker.AutoDetectChangesEnabled = false;
+            //  ppa_vareshContext _scontext = new ppa_vareshContext();
+            // _scontext.ChangeTracker.AutoDetectChangesEnabled = false;
             var _sc_i = 0;
             foreach (var m in result)
             {
@@ -611,11 +733,11 @@ namespace APWeather.Services
                 _sc_i++;
                 if (_sc_i % 100 == 0)
                 {
-                    var _sc_result=await _context.SaveAsync();
+                    var _sc_result = await _context.SaveAsync();
                     if (true)
                     {
                         _sc_i = 0;
-                       
+
                     }
                 }
             }
@@ -623,7 +745,7 @@ namespace APWeather.Services
 
 
 
-           // var saveResult = await _context.SaveAsync();
+            // var saveResult = await _context.SaveAsync();
             return new DataResponse
             {
                 Data = result.Count,
@@ -636,7 +758,7 @@ namespace APWeather.Services
 
         public async Task<DataResponse> GetTAF_ADDS_All()
         {
-            var stations = await _context.Airport.Where(q => q.ICAO.StartsWith("OI") || q.ICAO.StartsWith("ORNI")
+            var stations = await _context.Airport.Where(q => q.ICAO.StartsWith("OI") || q.ICAO.StartsWith("OR")
 
              || q.ICAO.StartsWith("UT")
              || q.ICAO.StartsWith("UG")
@@ -678,7 +800,7 @@ namespace APWeather.Services
                     var url = "https://aviationweather.gov/cgi-bin/data/dataserver.php?dataSource=tafs&requestType=retrieve&format=xml"
                     + "&startTime=" + from//"2021-08-10T00:00:00+0430"
                     + "&endTime=" + to//"2021-08-11T00:00:00+0430"
-                  // + "&hoursBeforeNow=3"
+                                      // + "&hoursBeforeNow=3"
                    + "&timeType=valid"
                    + "&stationString=" + _station_str //station//"OISS,OIII";
                    ;
@@ -694,15 +816,15 @@ namespace APWeather.Services
                             RawText = (string)item.Element("raw_text"),
                             StationId = (string)item.Element("station_id"),
                             //BulletinTime = string.IsNullOrEmpty((string)item.Element("bulletin_time")) ? null : (Nullable<DateTime>)Convert.ToDateTime((string)item.Element("bulletin_time")).ToUniversalTime(),
-                           // ValidTimeFrom = string.IsNullOrEmpty((string)item.Element("valid_time_from")) ? null : (Nullable<DateTime>)Convert.ToDateTime((string)item.Element("valid_time_from")).ToUniversalTime(),
-                           // ValidTimeTo = string.IsNullOrEmpty((string)item.Element("valid_time_to")) ? null : (Nullable<DateTime>)Convert.ToDateTime((string)item.Element("valid_time_to")).ToUniversalTime(),
+                            // ValidTimeFrom = string.IsNullOrEmpty((string)item.Element("valid_time_from")) ? null : (Nullable<DateTime>)Convert.ToDateTime((string)item.Element("valid_time_from")).ToUniversalTime(),
+                            // ValidTimeTo = string.IsNullOrEmpty((string)item.Element("valid_time_to")) ? null : (Nullable<DateTime>)Convert.ToDateTime((string)item.Element("valid_time_to")).ToUniversalTime(),
                             IssueTime = string.IsNullOrEmpty((string)item.Element("issue_time")) ? null : (Nullable<DateTime>)Convert.ToDateTime((string)item.Element("issue_time")).ToUniversalTime(),
-                           // Latitude = Convert.ToDecimal((string)item.Element("latitude")),
-                           // Longitude = Convert.ToDecimal((string)item.Element("longitude")),
-                           // EvaluationM = Convert.ToDecimal((string)item.Element("elevation_m")),
+                            // Latitude = Convert.ToDecimal((string)item.Element("latitude")),
+                            // Longitude = Convert.ToDecimal((string)item.Element("longitude")),
+                            // EvaluationM = Convert.ToDecimal((string)item.Element("elevation_m")),
                         };
-                      //  taf.WeatherTafForecast = getForecasts(item);
-                       // _context.WeatherTaf.Add(taf);
+                        //  taf.WeatherTafForecast = getForecasts(item);
+                        // _context.WeatherTaf.Add(taf);
 
                         result.Add(taf);
                     }
@@ -932,7 +1054,7 @@ namespace APWeather.Services
             try
             {
                 var baseDate = DateTime.Now.Date;
-                
+
                 var url = "http://65.21.100.132/weather/api/weather/metars/now";
                 string str_metar = string.Empty;
                 List<WeatherMetar> obj_metar = new List<WeatherMetar>();
@@ -982,7 +1104,7 @@ namespace APWeather.Services
                 //}
 
 
-                 var saveResult1 = await _context.SaveAsync();
+                var saveResult1 = await _context.SaveAsync();
 
                 ////////NOTAM////////////////
                 var url2 = "http://65.21.100.132/weather/api/weather/notam/now";
@@ -1026,7 +1148,7 @@ namespace APWeather.Services
 
                 //        }
                 //    }
-          //  }
+                //  }
 
 
                 ////////TAF////////////////
@@ -1043,10 +1165,10 @@ namespace APWeather.Services
 
                 }
                 var issue = DateTime.Now.AddHours(-6);
-                var exists3 = await _context.WeatherTaf.Where(q => q.DateDay == baseDate && q.IssueTime>=issue).Select(q => q.Id).ToListAsync();
+                var exists3 = await _context.WeatherTaf.Where(q => q.DateDay == baseDate && q.IssueTime >= issue).Select(q => q.Id).ToListAsync();
                 if (exists3.Count > 0)
                 {
-                    var exist_ids3 = string.Join(',', exists3 );
+                    var exist_ids3 = string.Join(',', exists3);
                     // _context.WeatherMetar.RemoveRange(exist);
                     _context.Database.ExecuteSqlCommand("Delete from WeatherTaf where id in (" + exist_ids3 + ")");
 
@@ -1086,6 +1208,76 @@ namespace APWeather.Services
             }
         }
 
+
+        public async Task<DataResponse> GetWXMetar()
+        {
+            try
+            {
+                var baseDate = DateTime.Now.Date;
+
+                var url = "http://65.21.100.132/weather/api/weather/metars/now";
+                string str_metar = string.Empty;
+                List<WeatherMetar> obj_metar = new List<WeatherMetar>();
+                using (WebClient webClient = new WebClient())
+                {
+
+                    str_metar = webClient.DownloadString(url);
+                    obj_metar = JsonConvert.DeserializeObject<List<WeatherMetar>>(str_metar);
+
+
+
+                }
+
+                List<DateTime?> obs_times = obj_metar.Select(q => q.observation_time).Distinct().ToList();
+                var exist = await _context.WeatherMetar.Where(q => /*q.DateDay == baseDate*/ obs_times.Contains(q.observation_time)).Select(q => q.Id).ToListAsync();
+                if (exist.Count > 0)
+                {
+                    var exist_ids = string.Join(',', exist);
+
+                    _context.Database.ExecuteSqlCommand("Delete from WeatherMetar where id in (" + exist_ids + ")");
+                    await _context.SaveAsync();
+                    // var saveResult1 = await _context.SaveAsync();
+                }
+
+                foreach (var x in obj_metar)
+                {
+                    x.Id = 0;
+                    _context.WeatherMetar.Add(x);
+                }
+
+                //var fffff = obj_metar.Where(q => q.StationId == "OIII").OrderByDescending(q => q.observation_time).ToList();
+                var _sc_i = 0;
+                //foreach (var x in obj_metar)
+                //{
+                //    x.Id = 0;
+                //    _context.WeatherMetar.Add(x);
+                //    _sc_i++;
+                //    if (_sc_i % 100 == 0)
+                //    {
+                //        var _sc_result = await _context.SaveAsync();
+                //        if (true)
+                //        {
+                //            _sc_i = 0;
+
+                //        }
+                //    }
+                //}
+
+
+                var saveResult1 = await _context.SaveAsync();
+
+
+                return new DataResponse() { Data = obj_metar };
+            }
+            catch (Exception ex)
+            {
+                var msg = ex.Message;
+                if (ex.InnerException != null)
+                    msg += ex.InnerException.Message;
+                return new DataResponse() { Data = msg };
+            }
+        }
+
         public async Task<object> GetMetarByDateNow()
         {
             var baseDate = DateTime.Now.Date;
@@ -1093,7 +1285,7 @@ namespace APWeather.Services
             var df = DateTime.Now.AddMinutes(-210).AddHours(-3);
 
             // var metars = await _context.WeatherMetar.Where(q => q.DateDay == baseDate).ToListAsync();
-            var metars = await _context.WeatherMetar.Where(q => q.observation_time>=df && q.observation_time<=dt).ToListAsync();
+            var metars = await _context.WeatherMetar.Where(q => q.observation_time >= df && q.observation_time <= dt).ToListAsync();
             return metars;
 
         }
@@ -1101,8 +1293,8 @@ namespace APWeather.Services
         public async Task<object> GetTafByDateNow()
         {
             var baseDate = DateTime.Now.Date;
-            var issue = DateTime.Now.AddHours(-6);
-            var metars = await _context.WeatherTaf.Where(q => q.DateDay == baseDate && q.IssueTime>=issue).ToListAsync();
+            var issue = DateTime.Now.AddHours(-24);
+            var metars = await _context.WeatherTaf.Where(q => q.DateDay == baseDate && q.IssueTime >= issue).ToListAsync();
             return metars;
 
         }
@@ -1122,13 +1314,14 @@ namespace APWeather.Services
 
         public async Task<DataResponse> GetAirportNotamAll()
         {
-            var stations = await _context.Airport.Where(q => q.ICAO.StartsWith("OI") || q.ICAO.StartsWith("ORNI")
+            var stations = await _context.Airport.Where(q => q.ICAO.StartsWith("OI") || q.ICAO.StartsWith("OR")
              || q.ICAO.StartsWith("UT")
              || q.ICAO.StartsWith("UG")
               || q.ICAO.StartsWith("OK")
                || q.ICAO.StartsWith("LT")
                || q.ICAO.StartsWith("UDYZ")
             ).Select(q => q.ICAO).ToListAsync();
+            //  stations = new List<string>() { "OIZH" };
             stations.Add("OIIX");
             DateTime baseDate = DateTime.Now.Date;
             var data = new List<NOTAM>();

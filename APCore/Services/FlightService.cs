@@ -290,6 +290,7 @@ namespace APCore.Services
         //Task<DataResponse> ValidateOFPs(List<int> fids);
         public async Task<DataResponse> ValidateOFPs(List<int?> fids)
         {
+            var _msgs = new List<string>();
             try
             {
                 var ofpImports = await _context.OFPImports.Where(q => fids.Contains(q.FlightId)).Select(q => new
@@ -300,6 +301,9 @@ namespace APCore.Services
                     q.Destination,
                     q.Id
                 }).ToListAsync();
+
+                var flight_ids = ofpImports.Select(q => q.FlightId).ToList();
+                var flights = await _context.FlightInformations.Where(q => flight_ids.Contains(q.ID)).ToListAsync();
 
                 var ofpImportIds = ofpImports.Select(q => q.Id).ToList();
 
@@ -338,10 +342,24 @@ namespace APCore.Services
                         var _toc_time = DateTime.Now.Date.AddHours(Convert.ToInt32(_toc.value.Substring(0, 2))).AddMinutes(Convert.ToInt32(_toc.value.Substring(2, 2)));
                         var _tod_time = DateTime.Now.Date.AddHours(Convert.ToInt32(_tod.value.Substring(0, 2))).AddMinutes(Convert.ToInt32(_tod.value.Substring(2, 2)));
 
-                        var diff = (_tod_time - _toc_time).TotalMinutes;
+                        // var diff = (_tod_time - _toc_time).TotalMinutes;
+                        var _flight_id = ofpImports.FirstOrDefault(q => q.Id == x.OFPId).FlightId;
+
+                        var _flight = flights.FirstOrDefault(q => q.ID == _flight_id);
+                        var diff = ((DateTime)_flight.STA - (DateTime)_flight.STD).TotalMinutes;
                         var hrs = (int)Math.Ceiling(diff * 1.0 / 60);
-                        var filled = _toc_tod_items.Where(q => !string.IsNullOrEmpty(q.value)).Count();
-                        if (hrs >= 2 && filled < hrs - 1)
+                        var hrs2 = diff * 1.0 / 60;
+                        var hrs2_int = Math.Truncate(hrs2);
+                        _msgs.Add(diff.ToString());
+                        _msgs.Add(hrs2.ToString());
+                        _msgs.Add(hrs2_int.ToString());
+
+
+                        //var filled = _toc_tod_items.Where(q => !string.IsNullOrEmpty(q.value)).Count();
+                        var filled=x.items.Where(q=> q.name.Contains("_ata") && !string.IsNullOrEmpty(q.value)).Count();
+                        _msgs.Add(filled.ToString());
+
+                        if (hrs2 >= 1 && /*filled < hrs - 1*/filled< hrs2_int+2)
                         {
                             errors.Add(new _h_error()
                             {
@@ -360,7 +378,8 @@ namespace APCore.Services
                 return new DataResponse()
                 {
                     Data = errors,
-                    IsSuccess = true
+                    IsSuccess = true,
+                    Messages=_msgs
 
                 };
             }
@@ -1534,7 +1553,7 @@ namespace APCore.Services
         }
         public async Task<DataResponse> GetCrewCalendarByYearMonth(int crewId, DateTime from, DateTime to)
         {
-            var data = await _context.AppFDPRests.Where(q => q.CrewId == crewId &&
+            var data = await _context.AppFDPRests.Where(q => q.CrewId == crewId && q.DateConfirmed !=null &&
              ((q.DateDutyStart >= from && q.DateDutyStart <= to) || (q.DateDutyEnd >= from && q.DateDutyEnd <= to))
 
             )

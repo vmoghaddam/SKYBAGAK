@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "APWeather", "APWeather\APWe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientApp", "ClientApp\ClientApp.csproj", "{4EAE5E45-A386-4C7D-AAF5-3E216EBF099E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEERJA", "NEERJA\NEERJA.csproj", "{B89A316C-2F24-4FB8-AC0F-71E8A04EE697}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEERJACore", "NEERJACore\NEERJACore.csproj", "{A3C2DEDD-45FB-4921-9689-1AE0BA3AF7A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{4EAE5E45-A386-4C7D-AAF5-3E216EBF099E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4EAE5E45-A386-4C7D-AAF5-3E216EBF099E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4EAE5E45-A386-4C7D-AAF5-3E216EBF099E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B89A316C-2F24-4FB8-AC0F-71E8A04EE697}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B89A316C-2F24-4FB8-AC0F-71E8A04EE697}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B89A316C-2F24-4FB8-AC0F-71E8A04EE697}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B89A316C-2F24-4FB8-AC0F-71E8A04EE697}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3C2DEDD-45FB-4921-9689-1AE0BA3AF7A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3C2DEDD-45FB-4921-9689-1AE0BA3AF7A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3C2DEDD-45FB-4921-9689-1AE0BA3AF7A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3C2DEDD-45FB-4921-9689-1AE0BA3AF7A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
