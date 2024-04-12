@@ -3047,6 +3047,12 @@ return;
         $rootScope.$broadcast('InitSCCAdd', data);
     }
 
+    $scope.evaClick = function (g) {
+        var data = { Id: $scope.selectedFlight.FlightId, crewId: $scope.selectedFlight.CrewId, crews: $scope.selectedFlightCrews, };
+
+        $rootScope.$broadcast('InitEvalAdd', data);
+    }
+
     ////////////////////
     var appWindow = angular.element($window);
     appWindow.bind('resize', function () {

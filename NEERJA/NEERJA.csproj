@@ -89,6 +89,7 @@
     <Content Include="app\controllers\drAdd.js" />
     <Content Include="app\controllers\epLogBook - Copy.js" />
     <Content Include="app\controllers\epLogBook.js" />
+    <Content Include="app\controllers\eval_add.js" />
     <Content Include="app\controllers\fdpController.js" />
     <Content Include="app\controllers\fdpsController.js" />
     <Content Include="app\controllers\filterController.js" />
@@ -169,6 +170,7 @@
     <Content Include="app\views\DocumentOther.html" />
     <Content Include="app\views\docviewer.html" />
     <Content Include="app\views\drAdd.html" />
+    <Content Include="app\views\eval_add.html" />
     <Content Include="app\views\fdp.html" />
     <Content Include="app\views\fdps.html" />
     <Content Include="app\views\filter.html" />

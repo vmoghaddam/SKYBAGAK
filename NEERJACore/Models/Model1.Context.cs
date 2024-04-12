@@ -37,5 +37,6 @@ namespace NEERJACore.Models
         public virtual DbSet<view_neerja_pfc_item> view_neerja_pfc_item { get; set; }
         public virtual DbSet<view_neerja_scc_report> view_neerja_scc_report { get; set; }
         public virtual DbSet<neerja_scc_report_form> neerja_scc_report_form { get; set; }
+        public virtual DbSet<view_neerja_evaluation> view_neerja_evaluation { get; set; }
     }
 }

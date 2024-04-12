@@ -75,7 +75,37 @@ app.factory('neerjaService', ['$http', '$q', 'ngAuthSettings', '$rootScope', fun
 
         return deferred.promise;
     };
+
+     var _save_eval = function (entity) {
+        var deferred = $q.defer();
+
+         $http.post(apicore + 'neerja/save/evaluation', entity).then(function (response) {
+            deferred.resolve(response.data);
+        }, function (err, status) {
+
+            deferred.reject(Exceptions.getMessage(err));
+        });
+
+        return deferred.promise;
+    };
+     var _get_eval = function (flightid, reporterid) {
+        var deferred = $q.defer();
+
+         $http.get(apicore + 'neerja/get/evaluation/' + flightid + '/' + reporterid).then(function (response) {
+            deferred.resolve(response.data);
+        }, function (err, status) {
+
+            deferred.reject(Exceptions.getMessage(err));
+        });
+
+        return deferred.promise;
+    };
+
+
     serviceFactory.save_scc = _save_scc;
+
+    serviceFactory.save_eval = _save_eval;
+    serviceFactory.get_eval = _get_eval;
 
     return serviceFactory;
 

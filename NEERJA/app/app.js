@@ -274,7 +274,8 @@ app.config(function ($routeProvider) {
         controller: "formsController",
         templateUrl: routePrefix + "/views/forms.html?v=2",
 
-    });
+      });
+
     $routeProvider.otherwise({ redirectTo: "/appflight" });
 
 });

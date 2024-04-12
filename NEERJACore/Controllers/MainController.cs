@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -71,9 +72,9 @@ namespace NEERJACore.Controllers
             {
                 scc_report = new neerja_scc_report_form()
                 {
-                     crew_id=dto.crew_id,
-                      flight_id=dto.flight_id,
-                       date_create=DateTime.Now,
+                    crew_id = dto.crew_id,
+                    flight_id = dto.flight_id,
+                    date_create = DateTime.Now,
                 };
 
 
@@ -151,6 +152,137 @@ namespace NEERJACore.Controllers
                     IsSuccess = false,
                     Errors = new List<string>() { helper.get_exception_message(ex) }
                 });
+            }
+        }
+
+
+        [HttpPost]
+        [Route("neerja/save/evaluation")]
+        public async Task<DataResponse> SaveEvaluation(dynamic dto)
+        {
+            ppa_entities context = new ppa_entities();
+
+            int reporter_id = dto.reporter_id;
+            int flight_id = dto.flight_id;
+
+            var form = context.neerja_evaluation_form.SingleOrDefault(q => q.flight_id == flight_id && q.reporter_id == reporter_id);
+
+            if (form == null)
+            {
+                form = new neerja_evaluation_form();
+                context.neerja_evaluation_form.Add(form);
+            }
+            form.position = " ";
+            form.reporter_id = dto.reporter_id;
+            form.flight_id = dto.flight_id;
+
+            context.SaveChanges();
+
+            foreach (var row in dto.scores)
+            {
+
+                int crew_id = row.crew_id;
+                int item_id = row.item_id;
+
+                var score = context.neerja_evaluation_form_score.SingleOrDefault(q => q.form_id == form.id && q.crew_id == crew_id && q.item_id == item_id);
+                if (score == null)
+                {
+                    score = new neerja_evaluation_form_score();
+                    context.neerja_evaluation_form_score.Add(score);
+                }
+
+                score.crew_id = row.crew_id;
+                score.item_id = row.item_id;
+                score.form_id = form.id;
+                score.score = row.score;
+                score.position = row.position;
+
+
+            }
+            context.SaveChanges();
+
+
+            return new DataResponse()
+            {
+                Data = null,
+                IsSuccess = true
+            };
+
+
+        }
+
+
+        [HttpGet]
+        [Route("neerja/get/evaluation/{flightid}/{reporterid}")]
+        public async Task<DataResponse> GetEvaluation(int flightid, int reporterid)
+        {
+            try
+            {
+                ppa_entities context = new ppa_entities();
+                //var result = context.view_neerja_evaluation.Where(q => q.flight_id == flightid && q.reporter_id == reporterid).ToList();
+                var query = from x in context.view_neerja_evaluation
+                            where x.reporter_id == reporterid && x.flight_id == flightid
+                            select x;
+
+                var result =  query.ToList();
+                
+                return new DataResponse()
+                {
+                    Data = result,
+                    IsSuccess = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new DataResponse()
+                {
+                    Data = ex.InnerException,
+                    IsSuccess = false
+                };
+            }
+        }
+
+        [HttpGet]
+        [Route("neerja/get/evaluation/report/{flightid}/{reporterid}")]
+        public async Task<DataResponse> neerja_evaluation(int flightid, int reporterid)
+        {
+            try
+            {
+                ppa_entities context = new ppa_entities();
+
+                var query = from x in context.view_neerja_evaluation
+                            where x.flight_id == flightid && x.reporter_id == reporterid
+                            group x by new { x.crew_id, x.FirstName, x.LastName, x.position} into grp
+                            select new
+                            {
+                                grp.Key.crew_id,
+                                grp.Key.position,
+                                Name = grp.Key.FirstName  + " - " + grp.Key.LastName,
+                                item_1 = grp.FirstOrDefault(q => q.item_id == 1).score,
+                                item_2 = grp.FirstOrDefault(q => q.item_id == 2).score,
+                                item_3 = grp.FirstOrDefault(q => q.item_id == 3).score,
+                                item_4 = grp.FirstOrDefault(q => q.item_id == 4).score,
+                                item_5 = grp.FirstOrDefault(q => q.item_id == 5).score,
+                                TotalScore = grp.Sum(q => q.score)
+                                //Scores = grp.Select(s => new { s.item_id, s.score }).ToList()
+                            };
+
+                var result = query.ToList();
+
+                return new DataResponse()
+                {
+                    Data = result,
+                    IsSuccess = true
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new DataResponse()
+                {
+                    Data = ex.InnerException,
+                    IsSuccess = false
+                };
             }
         }
 
@@ -337,6 +469,45 @@ namespace NEERJACore.Controllers
         }
 
 
+        public class PFCResult
+        {
+            public int Id { get; set; }
+            public int CategoryId { get; set; }
+            public string Category { get; set; }
+            public int ItemId { get; set; }
+            public string Item { get; set; }
+            public int Crew1Id { get; set; }
+            public string Crew1Name { get; set; }
+            public string Crew1Result { get; set; }
+            public string Crew2Id { get; set; }
+            public string Crew2Name { get; set; }
+            public string Crew2Result { get; set; }
+            public string Crew3Id { get; set; }
+            public string Crew3Name { get; set; }
+            public string Crew3Result { get; set; }
+            public string Crew4Id { get; set; }
+            public string Crew4Name { get; set; }
+            public string Crew4Result { get; set; }
+            public string Crew5Id { get; set; }
+            public string Crew5Name { get; set; }
+            public string Crew5Result { get; set; }
+            public string Crew6Id { get; set; }
+            public string Crew6Name { get; set; }
+            public string Crew6Result { get; set; }
+            public string Crew7Id { get; set; }
+            public string Crew7Name { get; set; }
+            public string Crew7Result { get; set; }
+            public string Crew8Id { get; set; }
+            public string Crew8Name { get; set; }
+            public string Crew8Result { get; set; }
+            public string Crew9Id { get; set; }
+            public string Crew9Name { get; set; }
+            public string Crew9Result { get; set; }
+            public string Crew10Id { get; set; }
+            public string Crew10Name { get; set; }
+            public string Crew10Result { get; set; }
+        }
+
         /////////////
     }
 
@@ -357,4 +528,6 @@ namespace NEERJACore.Controllers
             return msg;
         }
     }
+
+
 }
