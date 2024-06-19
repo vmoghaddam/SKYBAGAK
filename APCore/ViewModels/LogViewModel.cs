@@ -168,6 +168,23 @@ namespace APCore.ViewModels
         public string Date1Dt { get; set; }
         public string Date2Dt { get; set; }
 
+
+        public int NightTime { get; set; }
+        public string NightTimeDt { get; set; }
+
+        
+        public string FlightTypeOPS { get; set; }
+        public string FlightTypeOPSDt { get; set; }
+
+        public string AttForms { get; set; }
+        public string AttFormsDt { get; set; }
+
+        public int? PaxMale { get; set; }
+        public string PaxMaleDt { get; set; }
+
+        public int? PaxFemale { get; set; }
+        public string PaxFemaleDt { get; set; }
+
     }
 
 

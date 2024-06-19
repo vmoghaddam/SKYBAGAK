@@ -62,7 +62,7 @@ namespace APCore.Controllers
 
             var result = await _flightBagService.SaveEFBVoyageReport(voyage);
             if (!result.IsSuccess)
-                return NotFound(result.Errors);
+                return Ok(result );
             return Ok(result);
         }
 

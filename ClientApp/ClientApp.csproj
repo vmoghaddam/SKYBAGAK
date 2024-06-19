@@ -116,6 +116,7 @@
     <Content Include="app\controllers\rptflightssimple.js" />
     <Content Include="app\controllers\signAdd.js" />
     <Content Include="app\controllers\statController.js" />
+    <Content Include="app\controllers\vrAddKarun.js" />
     <Content Include="app\services\mbService.js" />
     <Content Include="app\services\statService.js" />
     <Content Include="app\setting.js" />
@@ -130,6 +131,7 @@
     <Content Include="app\views\rptflightssimple.html" />
     <Content Include="app\views\signAdd.html" />
     <Content Include="app\views\stat.html" />
+    <Content Include="app\views\vrAddKarun.html" />
     <Content Include="pdfjsmodule\pdfviewernew.js" />
     <Content Include="app\controllers\profileController.js" />
     <Content Include="app\controllers\refreshController.js" />

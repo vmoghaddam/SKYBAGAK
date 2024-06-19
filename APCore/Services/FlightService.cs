@@ -473,6 +473,11 @@ namespace APCore.Services
                         ofp.FuelTANKERING,
                         ofp.FuelTOTALFUEL,
                         ofp.FuelACTUALTANKERING,
+                        ofp.DSPNAME,
+                        ofp.CM1,
+                        ofp.CM2,
+                        ofp.MSH,
+                        ofp.ATC
 
 
                     },
@@ -587,6 +592,11 @@ namespace APCore.Services
                         q.FuelTANKERING,
                         q.FuelTOTALFUEL,
                         q.FuelACTUALTANKERING,
+                        q.CM1,
+                        q.CM2,
+                        q.MSH,
+                        q.DSPNAME,
+                        q.ATC
 
 
 
@@ -1018,6 +1028,16 @@ namespace APCore.Services
                 updateProp(flight.ID, log.CrewId, "PaxAdult", log.PaxAdultDt, log.PaxAdult.ToString(), props);
                 flight.PaxAdult = log.PaxAdult;
             }
+            if (log.PaxMale != null && checkLogProp(log.PaxMaleDt, "PaxMale", props))
+            {
+                updateProp(flight.ID, log.CrewId, "PaxMale", log.PaxMaleDt, log.PaxMale.ToString(), props);
+                flight.PaxMale = log.PaxMale;
+            }
+            if (log.PaxFemale != null && checkLogProp(log.PaxFemaleDt, "PaxFemale", props))
+            {
+                updateProp(flight.ID, log.CrewId, "PaxFemale", log.PaxFemaleDt, log.PaxFemale.ToString(), props);
+                flight.PaxFemale = log.PaxFemale;
+            }
 
 
             if (log.PaxChild != null && checkLogProp(log.PaxChildDt, "PaxAdult", props))
@@ -1136,6 +1156,26 @@ namespace APCore.Services
             {
                 updateProp(flight.ID, log.CrewId, "CommanderNote", log.CommanderNoteDt, log.CommanderNote.ToString(), props);
                 flight.CommanderNote = log.CommanderNote;
+            }
+
+
+            if (log.NightTime != null && checkLogProp(log.NightTimeDt, "NightTime", props))
+            {
+                updateProp(flight.ID, log.CrewId, "NightTime", log.NightTimeDt, log.NightTime.ToString(), props);
+                flight.NightTime = log.NightTime;
+            }
+
+
+            if (log.FlightTypeOPS != null && checkLogProp(log.FlightTypeOPSDt, "FlightTypeOPS", props))
+            {
+                updateProp(flight.ID, log.CrewId, "FlightTypeOPS", log.FlightTypeOPSDt, log.FlightTypeOPS.ToString(), props);
+                flight.FlightTypeOPS = log.FlightTypeOPS;
+            }
+
+            if (log.AttForms != null && checkLogProp(log.AttFormsDt, "AttForms", props))
+            {
+                updateProp(flight.ID, log.CrewId, "AttForms", log.AttFormsDt, log.AttForms.ToString(), props);
+                flight.AttForms = log.AttForms;
             }
 
             flight.JLUserId = log.CrewId;

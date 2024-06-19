@@ -431,6 +431,121 @@ app.run(['authService', 'activityService', '$rootScope', '$location', '$template
     //    return navigator.onLine;
     //};
 
+   
+
+    $rootScope.get_min_date = function (dt1, dt2) {
+        var dt1_num = Number(dt1.format('YYYYMMDDHHmm'));
+        var dt2_num = Number(dt2.format('YYYYMMDDHHmm'));
+        if (dt1_num < dt2_num)
+            return dt1;
+        else
+            return dt2;
+    };
+    $rootScope.get_max_date = function (dt1, dt2) {
+        var dt1_num = Number(dt1.format('YYYYMMDDHHmm'));
+        var dt2_num = Number(dt2.format('YYYYMMDDHHmm'));
+        if (dt1_num > dt2_num)
+            return dt1;
+        else
+            return dt2;
+    };
+    var dt1 = new moment(new Date(2024, 4, 10, 18, 50, 0, 0));
+    var dt2 = new moment(new Date(2024, 4, 10, 18, 57, 30, 0));
+    var duration = moment.duration(dt1.diff(dt2));
+   // alert(Math.sign(duration) * Math.round(Math.abs(duration.asMinutes())));
+   // alert($rootScope.get_min_date(dt1, dt2));
+
+    $rootScope.get_total_minutes = function (dt_end, dt_start) {
+
+        var duration = moment.duration(dt_end.diff(dt_start));
+        var mms = Math.sign(duration) * Math.round(Math.abs(duration.asMinutes()));
+        return mms;
+
+    };
+    
+
+    $rootScope.get_night_dawn = function (takeoff, landing, dep_dawn, arr_dawn) {
+        var day = $rootScope.get_total_minutes(landing, $rootScope.get_max_date(takeoff, dep_dawn));
+        if (day < 0)
+            day = 0;
+        var night = $rootScope.get_total_minutes($rootScope.get_min_date(landing, arr_dawn), takeoff);
+        if (night < 0)
+            night = 0;
+        
+        var day_night = $rootScope.get_total_minutes(landing, takeoff) - (day + night);
+        
+        return night + 0.5 * day_night;
+    };
+
+    $rootScope.get_night_dawn2 = function (takeoff, landing, dep_dawn, arr_dawn) {
+        var day = $rootScope.get_total_minutes(landing, $rootScope.get_max_date(takeoff, dep_dawn));
+        if (day < 0)
+            day = 0;
+        var night = $rootScope.get_total_minutes($rootScope.get_min_date(landing, dep_dawn), takeoff);
+        if (night < 0)
+            night = 0;
+
+        
+
+        return night ;
+    };
+
+    $rootScope.get_night_dusk = function (takeoff, landing, dep_dusk, arr_dusk) {
+        var night = $rootScope.get_total_minutes(landing, $rootScope.get_max_date(takeoff, dep_dusk));
+        if (night < 0)
+            night = 0;
+        var day = $rootScope.get_total_minutes($rootScope.get_min_date(landing, arr_dusk), takeoff);
+        if (day < 0)
+            day = 0;
+        var day_night = $rootScope.get_total_minutes(landing, takeoff) - (day + night);
+        return night + 0.5 * day_night;
+    };
+
+    $rootScope.get_night_dusk2 = function (takeoff, landing, dep_dusk, arr_dusk) {
+        var night = $rootScope.get_total_minutes(landing, $rootScope.get_max_date(takeoff, dep_dusk));
+        if (night < 0)
+            night = 0;
+        var day = $rootScope.get_total_minutes($rootScope.get_min_date(landing, dep_dusk), takeoff);
+        if (day < 0)
+            day = 0;
+        
+        return night  ;
+    };
+
+    $rootScope.get_night_time = function (takeoff, landing, dep_dawn, dep_dusk, arr_dawn, arr_dusk) {
+        var night_time = 0;
+        var day_time = 0;
+        var dep_dawn_num = Number(moment(dep_dawn).format('YYYYMMDDHHmm'));
+        var dep_dusk_num = Number(moment(dep_dusk).format('YYYYMMDDHHmm'));
+        var arr_dawn_num = Number(moment(arr_dawn).format('YYYYMMDDHHmm'));
+        var arr_dusk_num = Number(moment(arr_dusk).format('YYYYMMDDHHmm'));
+        var takeoff_num = Number(moment(takeoff).format('YYYYMMDDHHmm'));
+        var landing_num = Number(moment(landing).format('YYYYMMDDHHmm'));
+
+        var dep_dawn_dt = new moment(dep_dawn);
+        var dep_dusk_dt = new moment(dep_dusk);
+        var arr_dawn_dt = new moment(arr_dawn);
+        var arr_dusk_dt = new moment(arr_dusk);
+        var takeoff_dt = new moment(takeoff);
+        var landing_dt = new moment(landing);
+
+      
+
+        if (dep_dawn_num >= arr_dawn_num) {
+            var night_dawn = $rootScope.get_night_dawn(takeoff_dt, landing_dt, dep_dawn_dt, arr_dawn_dt);
+            var night_dusk = $rootScope.get_night_dusk(takeoff_dt, landing_dt, dep_dusk_dt, arr_dusk_dt);
+           // alert(night_dawn);
+           // alert(night_dusk);
+            return (Math.max(night_dawn, night_dusk));
+        }
+        else {
+            var night_dawn = $rootScope.get_night_dawn2(takeoff_dt, landing_dt, dep_dawn_dt, arr_dawn_dt);
+            var night_dusk = $rootScope.get_night_dusk2(takeoff_dt, landing_dt, dep_dusk_dt, arr_dusk_dt);
+            return (Math.max(night_dawn, night_dusk));
+        }
+    }
+    //$rootScope.get_night_time(new Date(2024, 4, 19,10, 0), new Date(2024, 4, 19, 14, 0), new Date(2024, 4, 19, 1, 0), new Date(2024, 4, 19, 11, 0), new Date(2024, 4, 19, 4, 0)
+    //    , new Date(2024, 4, 19, 14, 0));
     $rootScope.getOnlineStatus = function () {
 
 

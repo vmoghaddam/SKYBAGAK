@@ -79,6 +79,7 @@ namespace APCore.ViewModels
         public DateTime? PICDate { get; set; }
 
 
+
         public int? DayNightStatusId { get; set; }
         public int? IncidentTypeId { get; set; }
         public int? AATXAbove { get; set; }
@@ -97,6 +98,8 @@ namespace APCore.ViewModels
         public double? BSHeading { get; set; }
         public int? BSTurningId { get; set; }
         public string User { get; set; }
+        public int? OPSStatusId { get; set; }
+        public int? OPSStaffStatusId { get; set; }
         public int Id { get; set; }
     }
 

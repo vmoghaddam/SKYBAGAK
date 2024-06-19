@@ -109,10 +109,17 @@ namespace APCore.Models
 
         public int? FuelACTUALTANKERING { get; set; }
 
-        
+
+        public string DSPNAME { get; set; }
+        public string CM1 { get; set; }
+        public string CM2 { get; set; }
+        public string MSH { get; set; }
+        public string ATC { get; set; }
 
 
-public virtual FlightInformation Flight { get; set; }
+
+
+        public virtual FlightInformation Flight { get; set; }
         public virtual ICollection<OFPImportItem> OFPImportItems { get; set; }
         public virtual ICollection<OFPImportProp> OFPImportProps { get; set; }
 

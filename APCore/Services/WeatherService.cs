@@ -49,6 +49,7 @@ namespace APCore.Services
         Task<DataResponse> GetMETAR_ADDS_ALL();
         Task<DataResponse> GetMETAR_ADDS_FromArchive(string stations, DateTime baseDate);
         Task<DataResponse> GetSIGWX_IRIMO();
+        Task<DataResponse> GetSIGWX_IRIMO_NEW();
         Task<DataResponse> GetFlightFolder_IRIMO();
         Task<DataResponse> GetTAFMETAR_METNO(string icao, string date, int useoffset, string type);
         Task<DataResponse> GetAvmetAsync3();
@@ -506,6 +507,97 @@ namespace APCore.Services
             };
         }
 
+        public async Task<DataResponse> GetSIGWX_IRIMO_NEW()
+        {
+            List<string> valid = new List<string>() { "00", "06", "12", "18" };
+            List<string> level = new List<string>() { "IRAN"/*, "WEST", "EAST"*/ };
+            List<string> results = new List<string>();
+            var nowDate = DateTime.Now.Date;
+            foreach (var v in valid)
+            {
+                foreach (var l in level)
+                {
+                    var result = "SIGWX_IRIMO_" + nowDate.ToString("yyyyMMdd") + "_" + "VALID" + v + "LVL" + l + ".png";
+                    results.Add(result);
+                    string webRootPath = _webHostEnvironment.ContentRootPath;
+                    string path = "";
+                    path = Path.Combine(webRootPath, "Upload", "Weather", "SIGWX", "IRIMO", result);
+                    var url = _configuration["WeatherUrls:SIGWX_IRIMO"];
+                    using (WebClient webClient = new WebClient())
+                    {
+
+                        byte[] data = webClient.DownloadData(url + "SIGWX_" + l + v);
+
+                        using (MemoryStream mem = new MemoryStream(data))
+                        {
+                            var memLen = mem.Length;
+                            using (var yourImage = System.Drawing.Image.FromStream(mem))
+                            {
+                                var yyy = yourImage.GetHashCode();
+                                //var dbrec = await _context.WeatherSIGWXIrimos.Where(q => q.Title == result).FirstOrDefaultAsync();
+                                //if (dbrec != null)
+                                //{
+                                //    if (dbrec.Size != memLen)
+                                //    {
+
+                                //        result = "SIGWX_IRIMO_" + nowDate.AddDays(1).ToString("yyyyMMdd") + "_" + "VALID" + v + "LVL" + l + ".png";
+                                //        path = Path.Combine(webRootPath, "Upload", "Weather", "SIGWX", "IRIMO", result);
+                                //        var newdbRec = await _context.WeatherSIGWXIrimos.Where(q => q.Title == result).FirstOrDefaultAsync();
+                                //        if (newdbRec == null)
+                                //            _context.WeatherSIGWXIrimos.Add(new WeatherSIGWXIrimo()
+                                //            {
+                                //                DateCreate = DateTime.Now,
+                                //                DateDay = nowDate.AddDays(1).Date,
+                                //                Level = l,
+                                //                Valid = v,
+                                //                Size = Convert.ToInt32(memLen),
+                                //                Title = result
+
+                                //            });
+                                //        else
+                                //        {
+                                //            newdbRec.DateCreate = DateTime.Now;
+                                //            newdbRec.DateDay = nowDate.AddDays(1).Date;
+                                //            newdbRec.Size = Convert.ToInt32(memLen);
+                                //        }
+                                //    }
+
+                                //}
+                                //else
+                                //{
+                                //    _context.WeatherSIGWXIrimos.Add(new WeatherSIGWXIrimo()
+                                //    {
+                                //        DateCreate = DateTime.Now,
+                                //        DateDay = nowDate.Date,
+                                //        Level = l,
+                                //        Valid = v,
+                                //        Size = Convert.ToInt32(memLen),
+                                //        Title = result
+
+                                //    });
+                                //}
+                                // If you want it as Png
+                                yourImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                                yourImage.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+                                await _context.SaveAsync();
+                                // If you want it as Jpeg
+                                //yourImage.Save("path_to_your_file.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                            }
+                        }
+
+                    }
+                }
+
+            }
+
+
+            return new DataResponse
+            {
+                Data = results,
+                Errors = null,
+                IsSuccess = true
+            };
+        }
 
         public async Task<DataResponse> GetFlightFolder_IRIMO()
         {

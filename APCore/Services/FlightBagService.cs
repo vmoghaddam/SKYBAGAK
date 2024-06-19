@@ -268,8 +268,9 @@ namespace APCore.Services
                 {
                     voyage.EFBFlightIrregularities = await _context.EFBFlightIrregularities.Where(q => q.VoyageReportId == voyage.Id).ToListAsync();
                     voyage.EFBReasons = await _context.EFBReasons.Where(q => q.VoyageReportId == voyage.Id).ToListAsync();
+                    voyage.EFBDutyDisorders=await _context.EFBDutyDisorders.Where(q => q.VoyageReportId == voyage.Id).ToListAsync();
                     //var irregularity = await _context.EFBFlightIrregularities.Where(q => q.VoyageReportId == voyage.Id).Select(q => q.IrrId).ToListAsync();
-                   // var reason = await _context.EFBReasons.Where(q => q.VoyageReportId == voyage.Id).Select(q => q.ReasonId).ToListAsync();
+                    // var reason = await _context.EFBReasons.Where(q => q.VoyageReportId == voyage.Id).Select(q => q.ReasonId).ToListAsync();
                     return new DataResponse()
                     {
                         //Data = new
@@ -446,6 +447,9 @@ namespace APCore.Services
             entity.SigxWXTypeId = EFBASR.SigxWXTypeId;
             entity.BSTurningId = EFBASR.BSTurningId;
 
+            entity.OPSStatusId = EFBASR.OPSStatusId;
+            entity.OPSStaffStatusId = EFBASR.OPSStaffStatusId;
+
 
             var saveResult = await _context.SaveAsync();
             if (saveResult.Succeed)
@@ -509,67 +513,119 @@ namespace APCore.Services
 
         public async Task<DataResponse> SaveEFBVoyageReport(EFBVoyageReportViewModel EFBVoyageReport)
         {
-            var entity = await _context.EFBVoyageReports.FirstOrDefaultAsync(q => q.FlightId == EFBVoyageReport.FlightId);
-
-            if (entity == null)
+            try
             {
-                entity = new EFBVoyageReport();
-                _context.EFBVoyageReports.Add(entity);
-            }
-            entity.User = EFBVoyageReport.User;
-            entity.DateUpdate = DateTime.UtcNow.ToString("yyyyMMddHHmm");
-            entity.FlightId = EFBVoyageReport.FlightId;
-            entity.Route = EFBVoyageReport.Route;
-            entity.RestReduction = EFBVoyageReport.RestReduction;
-            entity.DutyExtention = EFBVoyageReport.DutyExtention;
-            entity.DepDelay = EFBVoyageReport.DepDelay;
-            entity.Report = EFBVoyageReport.Report;
-            entity.DatePICSignature = Helper.ConvertToDate(EFBVoyageReport.DatePICSignature);
-            entity.ActionedById = EFBVoyageReport.ActionedById;
-            entity.DateActioned = Helper.ConvertToDate(EFBVoyageReport.DateActioned);
-            entity.DateConfirmed = null;
+                 
+                var entity = await _context.EFBVoyageReports.FirstOrDefaultAsync(q => q.FlightId == EFBVoyageReport.FlightId);
 
-            var exist = await _context.EFBFlightIrregularities.Where(q => q.VoyageReportId == entity.Id).ToListAsync();
-            _context.EFBFlightIrregularities.RemoveRange(exist);
-
-            if (EFBVoyageReport.Irregularities != null)
-            {
-                foreach (int x in EFBVoyageReport.Irregularities)
+                if (entity == null)
                 {
-                    entity.EFBFlightIrregularities.Add(new EFBFlightIrregularity()
-                    {
-                        VoyageReport = entity,
-                        IrrId = x
-                    });
-
+                    entity = new EFBVoyageReport();
+                    _context.EFBVoyageReports.Add(entity);
                 }
-            }
+                entity.User = EFBVoyageReport.User;
+                entity.DateUpdate = DateTime.UtcNow.ToString("yyyyMMddHHmm");
+                entity.FlightId = EFBVoyageReport.FlightId;
+                entity.Route = EFBVoyageReport.Route;
+                entity.RestReduction = EFBVoyageReport.RestReduction;
+                entity.DutyExtention = EFBVoyageReport.DutyExtention;
+                entity.DepDelay = EFBVoyageReport.DepDelay;
+                entity.Report = EFBVoyageReport.Report;
+                entity.DatePICSignature = Helper.ConvertToDate(EFBVoyageReport.DatePICSignature);
+                entity.ActionedById = EFBVoyageReport.ActionedById;
+                entity.DateActioned = Helper.ConvertToDate(EFBVoyageReport.DateActioned);
+                entity.DateConfirmed = null;
 
-            var existReason = await _context.EFBReasons.Where(q => q.VoyageReportId == entity.Id).ToListAsync();
-            _context.EFBReasons.RemoveRange(existReason);
 
-            if (EFBVoyageReport.Reasons != null)
-            {
-                foreach (int x in EFBVoyageReport.Reasons)
+                entity.AttForm_ASR = EFBVoyageReport.AttForm_ASR;
+                entity.AttForm_CSR = EFBVoyageReport.AttForm_CSR;
+                entity.AttForm_CR = EFBVoyageReport.AttForm_CR;
+                entity.AttForm_Other = EFBVoyageReport.AttForm_Other;
+                entity.IsForInformation = EFBVoyageReport.IsForInformation;
+                entity.IsActionRequired = EFBVoyageReport.IsActionRequired;
+                entity.AttForm_ACCIDET = EFBVoyageReport.AttForm_ACCIDET;
+
+                entity.OtherForm = EFBVoyageReport.OtherForm;
+                entity.ActionTaken = EFBVoyageReport.ActionTaken;
+
+
+
+
+
+
+                var exist = await _context.EFBFlightIrregularities.Where(q => q.VoyageReportId == entity.Id).ToListAsync();
+                _context.EFBFlightIrregularities.RemoveRange(exist);
+
+                if (EFBVoyageReport.Irregularities != null)
                 {
-                    entity.EFBReasons.Add(new EFBReason()
+                    foreach (int x in EFBVoyageReport.Irregularities)
                     {
-                        VoyageReport = entity,
-                        ReasonId = x
-                    });
+                        entity.EFBFlightIrregularities.Add(new EFBFlightIrregularity()
+                        {
+                            VoyageReport = entity,
+                            IrrId = x
+                        });
 
+                    }
                 }
-            }
 
-            var saveResult = await _context.SaveAsync();
-            if (saveResult.Succeed)
+                var existReason = await _context.EFBReasons.Where(q => q.VoyageReportId == entity.Id).ToListAsync();
+                _context.EFBReasons.RemoveRange(existReason);
+
+                if (EFBVoyageReport.Reasons != null)
+                {
+                    foreach (int x in EFBVoyageReport.Reasons)
+                    {
+                        entity.EFBReasons.Add(new EFBReason()
+                        {
+                            VoyageReport = entity,
+                            ReasonId = x
+                        });
+
+                    }
+                }
+
+
+                var existDutyDisorders = await _context.EFBDutyDisorders.Where(q => q.VoyageReportId == entity.Id).ToListAsync();
+                _context.EFBDutyDisorders.RemoveRange(existDutyDisorders);
+
+                if (EFBVoyageReport.DutyDisorders != null)
+                {
+                    foreach (int x in EFBVoyageReport.DutyDisorders)
+                    {
+                        entity.EFBDutyDisorders.Add(new EFBDutyDisorder()
+                        {
+                            //VoyageReportId=entity.Id,
+                            VoyageReport = entity,
+                            DisorderId = x
+                        });
+
+                    }
+                }
+
+                var saveResult = await _context.SaveAsync();
+                if (saveResult.Succeed)
+                {
+
+                    return new DataResponse() { IsSuccess = true, Data = entity };
+                }
+
+                else
+                    return new DataResponse() { IsSuccess = false, Errors=new List<string>() { saveResult.ErrorMessage},Data=saveResult };
+
+
+            }
+            catch(Exception ex)
             {
-
-                return new DataResponse() { IsSuccess = true, Data = entity };
+                var msg = ex.Message;
+                if (ex.InnerException != null)
+                    msg += "   " + ex.InnerException.Message;
+                return new DataResponse() { IsSuccess = false, Errors=new List<string>() { msg } };
             }
-                
-            else
-                return new DataResponse() { IsSuccess = false };
+
+
+
+
         }
 
 

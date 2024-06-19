@@ -57,6 +57,8 @@ namespace APCore.Models
         public decimal? FuelDeparture { get; set; }
         public decimal? FuelArrival { get; set; }
         public int? PaxAdult { get; set; }
+        public int? PaxMale { get; set; }
+        public int? PaxFemale { get; set; }
         public int? PaxInfant { get; set; }
         public int? PaxChild { get; set; }
         public int? CargoWeight { get; set; }
@@ -197,7 +199,7 @@ namespace APCore.Models
         public int? MAXZFW { get; set; }
         public int? MAXLNW { get; set; }
 
-         
+
 
         public int? OFPCONTFUEL { get; set; }
         public int? OFPALT1FUEL { get; set; }
@@ -218,6 +220,9 @@ namespace APCore.Models
 
         public int? ACTUALTANKERINGFUEL { get; set; }
         public string LTR2 { get; set; }
+        public string FlightTypeOPS { get; set; }
+
+        public string AttForms { get; set; }
 
         public virtual Organization AirlineOperators { get; set; }
         public virtual Box Box { get; set; }

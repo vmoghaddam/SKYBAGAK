@@ -24,6 +24,17 @@ namespace APCore.ViewModels
         public int? DepDelay { get; set; }
         public List<int> Irregularities { get; set; }
         public List<int> Reasons { get; set; }
+        public List<int> DutyDisorders { get; set; }
         public string User { get; set; }
+        public bool? AttForm_ASR { get; set; }
+        public bool? AttForm_CSR { get; set; }
+        public bool? AttForm_CR { get; set; }
+        public bool? AttForm_Other { get; set; }
+        public bool? IsForInformation { get; set; }
+        public bool? IsActionRequired { get; set; }
+        public bool? AttForm_ACCIDET { get; set; }
+
+        public string OtherForm { get; set; }
+        public string ActionTaken { get; set; }
     }
 }

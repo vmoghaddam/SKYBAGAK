@@ -140,6 +140,7 @@ namespace APCore.Models
         public virtual DbSet<EFBFlightIrregularity> EFBFlightIrregularities { get; set; }
         public virtual DbSet<EFBOccurrenceCAO> EFBOccurrenceCAOs { get; set; }
         public virtual DbSet<EFBReason> EFBReasons { get; set; }
+        public virtual DbSet<EFBDutyDisorder> EFBDutyDisorders { get; set; }
         public virtual DbSet<EFBVoyageReport> EFBVoyageReports { get; set; }
         public virtual DbSet<Employee> Employees { get; set; }
         public virtual DbSet<EmployeeBookStatus> EmployeeBookStatuses { get; set; }
@@ -4556,6 +4557,17 @@ namespace APCore.Models
                     .HasForeignKey(d => d.VoyageReportId)
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("fk-Irr-vr");
+            });
+
+            modelBuilder.Entity<EFBDutyDisorder>(entity =>
+            {
+                entity.ToTable("EFBDutyDisorder");
+
+                entity.HasOne(d => d.VoyageReport)
+                    .WithMany(p => p.EFBDutyDisorders)
+                    .HasForeignKey(d => d.VoyageReportId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("fk_disorder_voyage");
             });
 
             modelBuilder.Entity<EFBOccurrenceCAO>(entity =>

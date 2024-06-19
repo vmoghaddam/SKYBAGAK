@@ -59,6 +59,8 @@ namespace APCore.Models
         public int? PaxChild { get; set; }
         public int? PaxInfant { get; set; }
         public int? PaxAdult { get; set; }
+        public int? PaxMale { get; set; }
+        public int? PaxFemale { get; set; }
         public int? PaxTotal { get; set; }
         public int? PaxRevenued { get; set; }
         public int? FuelUnitID { get; set; }

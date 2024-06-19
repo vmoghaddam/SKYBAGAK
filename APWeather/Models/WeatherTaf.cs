@@ -29,6 +29,8 @@ namespace APWeather.Models
         public DateTime? DateDay { get; set; }
         public int? FlightId { get; set; }
         public int? FDPId { get; set; }
+        public int? taf_id { get; set; }
+        public string response_text { get; set; }
 
         public virtual ICollection<WeatherTafForecast> WeatherTafForecast { get; set; }
     }

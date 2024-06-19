@@ -47,6 +47,8 @@ namespace APWeather.Models
         public DateTime? DateDay { get; set; }
         public int? FlightId { get; set; }
         public int? FDPId { get; set; }
+        public int? metar_id { get; set; }
+        public string response_text { get; set; }
 
         public virtual ICollection<WeatherMetarQualityControl> WeatherMetarQualityControl { get; set; }
         public virtual ICollection<WeatherMetarSkyCondition> WeatherMetarSkyCondition { get; set; }

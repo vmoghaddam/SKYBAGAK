@@ -128,7 +128,7 @@ namespace APCore.Controllers
         {
             //  var userData = User.FindFirst(ClaimTypes.UserData).Value;
 
-            var result = await _weatherService.GetSIGWX_IRIMO();
+            var result = await _weatherService.GetSIGWX_IRIMO_NEW();
             if (!result.IsSuccess)
                 return NotFound(result.Errors);
             return Ok(result);

@@ -11,6 +11,7 @@ namespace APCore.Models
         {
             EFBFlightIrregularities = new HashSet<EFBFlightIrregularity>();
             EFBReasons = new HashSet<EFBReason>();
+            EFBDutyDisorders = new HashSet<EFBDutyDisorder>();
         }
 
         public int Id { get; set; }
@@ -43,9 +44,20 @@ namespace APCore.Models
         public string OPSStaffUser { get; set; }
         public int? OPSStatusId { get; set; }
         public int? OPSStaffStatusId { get; set; }
+        public bool? AttForm_ASR { get; set; }
+        public bool? AttForm_CSR { get; set; }
+        public bool? AttForm_CR { get; set; }
+        public bool? AttForm_Other { get; set; }
+        public bool? IsForInformation { get; set; }
+        public bool? IsActionRequired { get; set; }
+        public bool? AttForm_ACCIDET { get; set; }
+
+        public string OtherForm { get; set; }
+        public string ActionTaken { get; set; }
 
         public virtual FlightInformation Flight { get; set; }
         public virtual ICollection<EFBFlightIrregularity> EFBFlightIrregularities { get; set; }
         public virtual ICollection<EFBReason> EFBReasons { get; set; }
+        public virtual ICollection<EFBDutyDisorder> EFBDutyDisorders { get; set; }
     }
 }

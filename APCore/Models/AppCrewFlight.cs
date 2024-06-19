@@ -91,6 +91,8 @@ namespace APCore.Models
         public int? PaxAdult { get; set; }
         public int? PaxChild { get; set; }
         public int? PaxInfant { get; set; }
+        public int? PaxMale { get; set; }
+        public int? PaxFemale { get; set; }
         public int? PaxTotal { get; set; }
         public int? PaxRevenued { get; set; }
         public string SerialNo { get; set; }
@@ -162,5 +164,13 @@ namespace APCore.Models
         public int? TANKERINGDIFF { get; set; }
         public int? ACTUALTOTALFUEL { get; set; }
         public string LTR2 { get; set; }
+
+        public DateTime? dep_dawn { get; set; }
+        public DateTime? dep_dusk { get; set; }
+        public DateTime? arr_dawn { get; set; }
+        public DateTime? arr_dusk { get; set; }
+
+        public string FlightTypeOPS { get; set; }
+        public string AttForms { get; set; }
     }
 }

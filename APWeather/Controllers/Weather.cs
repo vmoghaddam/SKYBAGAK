@@ -80,6 +80,14 @@ namespace APWeather.Controllers
             return Ok(result);
         }
 
+        [HttpGet]
+        [Route("metar/route/{rts}/{stns}/{std}/{sta}")]
+        public async Task<IActionResult> GetMETAR_ROUTES(string rts,string stns,string std,string sta)
+        {
+            var result = await _weatherService.GetFDPMetarsByROUTE(stns, rts, std, sta);
+            return Ok(result);
+        }
+
         [Route("metar/flight/{flt}")]
         public async Task<IActionResult> GetMETAR_Flight(int flt)
         {
@@ -116,7 +124,8 @@ namespace APWeather.Controllers
         [Route("metar/adds/all")]
         public async Task<ActionResult> GetMETARADDS_All()
         {
-            var result = await _weatherService.GetMETAR_ADDS_ALL();
+            //var result = await _weatherService.GetMETAR_ADDS_ALL();
+            var result = await _weatherService.GetMETAR_ADDS_ALL_2024();
             if (!result.IsSuccess)
                 return NotFound(result.Errors);
             return Ok(result);
@@ -134,7 +143,7 @@ namespace APWeather.Controllers
         [Route("taf/adds/all")]
         public async Task<ActionResult> GetTAFADDS_All()
         {
-            var result = await _weatherService.GetTAF_ADDS_All();
+            var result = await _weatherService.GetTAF_ADDS_All_2024();
             if (!result.IsSuccess)
                 return NotFound(result.Errors);
             return Ok(result);

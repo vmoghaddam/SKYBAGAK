@@ -359,7 +359,7 @@ namespace APCore.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+       // [Authorize]
         [Route("api/flight/log/save2")]
         public async Task<IActionResult> SaveFlightLog2(LogViewModel2 log)
         {
