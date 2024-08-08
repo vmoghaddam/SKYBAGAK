@@ -117,6 +117,29 @@
           <Property Name="position" Type="varchar" MaxLength="500" />
         </EntityType>
         <!--Errors Found During Generation:
+warning 6002: The table/view 'ppa_varesh.dbo.view_neerja_evaluation' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="view_neerja_evaluation">
+          <Key>
+            <PropertyRef Name="flight_id" />
+            <PropertyRef Name="reporter_id" />
+            <PropertyRef Name="crew_id" />
+            <PropertyRef Name="item_id" />
+            <PropertyRef Name="FirstName" />
+            <PropertyRef Name="LastName" />
+          </Key>
+          <Property Name="flight_id" Type="int" Nullable="false" />
+          <Property Name="reporter_id" Type="int" Nullable="false" />
+          <Property Name="position" Type="varchar" MaxLength="500" />
+          <Property Name="date_sign" Type="datetime2" Precision="7" />
+          <Property Name="remark" Type="nvarchar" MaxLength="2000" />
+          <Property Name="score" Type="int" />
+          <Property Name="crew_id" Type="int" Nullable="false" />
+          <Property Name="item_id" Type="int" Nullable="false" />
+          <Property Name="title" Type="nvarchar" MaxLength="1000" />
+          <Property Name="FirstName" Type="nvarchar" MaxLength="500" Nullable="false" />
+          <Property Name="LastName" Type="nvarchar" MaxLength="500" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
 warning 6002: The table/view 'ppa_varesh.dbo.view_neerja_pfc_item' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="view_neerja_pfc_item">
           <Key>
@@ -230,6 +253,21 @@ warning 6002: The table/view 'ppa_varesh.dbo.view_neerja_scc_report' does not ha
           <EntitySet Name="neerja_preflight_ckeck_form_item" EntityType="Self.neerja_preflight_ckeck_form_item" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="neerja_preflight_from_remark" EntityType="Self.neerja_preflight_from_remark" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="neerja_scc_report_form" EntityType="Self.neerja_scc_report_form" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="view_neerja_evaluation" EntityType="Self.view_neerja_evaluation" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [view_neerja_evaluation].[flight_id] AS [flight_id], 
+    [view_neerja_evaluation].[reporter_id] AS [reporter_id], 
+    [view_neerja_evaluation].[position] AS [position], 
+    [view_neerja_evaluation].[date_sign] AS [date_sign], 
+    [view_neerja_evaluation].[remark] AS [remark], 
+    [view_neerja_evaluation].[score] AS [score], 
+    [view_neerja_evaluation].[crew_id] AS [crew_id], 
+    [view_neerja_evaluation].[item_id] AS [item_id], 
+    [view_neerja_evaluation].[title] AS [title], 
+    [view_neerja_evaluation].[FirstName] AS [FirstName], 
+    [view_neerja_evaluation].[LastName] AS [LastName]
+    FROM [dbo].[view_neerja_evaluation] AS [view_neerja_evaluation]</DefiningQuery>
+          </EntitySet>
           <EntitySet Name="view_neerja_pfc_item" EntityType="Self.view_neerja_pfc_item" store:Type="Views" store:Schema="dbo">
             <DefiningQuery>SELECT 
     [view_neerja_pfc_item].[category_order_id] AS [category_order_id], 
@@ -318,6 +356,7 @@ warning 6002: The table/view 'ppa_varesh.dbo.view_neerja_scc_report' does not ha
           <EntitySet Name="view_neerja_pfc_item" EntityType="ppaModel.view_neerja_pfc_item" />
           <EntitySet Name="view_neerja_scc_report" EntityType="ppaModel.view_neerja_scc_report" />
           <EntitySet Name="neerja_scc_report_form" EntityType="ppaModel.neerja_scc_report_form" />
+          <EntitySet Name="view_neerja_evaluation" EntityType="ppaModel.view_neerja_evaluation" />
         </EntityContainer>
         <EntityType Name="neerja_evaluation_form">
           <Key>
@@ -537,6 +576,27 @@ warning 6002: The table/view 'ppa_varesh.dbo.view_neerja_scc_report' does not ha
           <Property Name="remark" Type="String" MaxLength="2000" FixedLength="false" Unicode="true" />
           <Property Name="position" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
         </EntityType>
+        <EntityType Name="view_neerja_evaluation">
+          <Key>
+            <PropertyRef Name="flight_id" />
+            <PropertyRef Name="reporter_id" />
+            <PropertyRef Name="crew_id" />
+            <PropertyRef Name="item_id" />
+            <PropertyRef Name="FirstName" />
+            <PropertyRef Name="LastName" />
+          </Key>
+          <Property Name="flight_id" Type="Int32" Nullable="false" />
+          <Property Name="reporter_id" Type="Int32" Nullable="false" />
+          <Property Name="position" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="date_sign" Type="DateTime" Precision="7" />
+          <Property Name="remark" Type="String" MaxLength="2000" FixedLength="false" Unicode="true" />
+          <Property Name="score" Type="Int32" />
+          <Property Name="crew_id" Type="Int32" Nullable="false" />
+          <Property Name="item_id" Type="Int32" Nullable="false" />
+          <Property Name="title" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="FirstName" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="LastName" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="true" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -703,6 +763,23 @@ warning 6002: The table/view 'ppa_varesh.dbo.view_neerja_scc_report' does not ha
                 <ScalarProperty Name="crew_id" ColumnName="crew_id" />
                 <ScalarProperty Name="flight_id" ColumnName="flight_id" />
                 <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="view_neerja_evaluation">
+            <EntityTypeMapping TypeName="ppaModel.view_neerja_evaluation">
+              <MappingFragment StoreEntitySet="view_neerja_evaluation">
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="title" ColumnName="title" />
+                <ScalarProperty Name="item_id" ColumnName="item_id" />
+                <ScalarProperty Name="crew_id" ColumnName="crew_id" />
+                <ScalarProperty Name="score" ColumnName="score" />
+                <ScalarProperty Name="remark" ColumnName="remark" />
+                <ScalarProperty Name="date_sign" ColumnName="date_sign" />
+                <ScalarProperty Name="position" ColumnName="position" />
+                <ScalarProperty Name="reporter_id" ColumnName="reporter_id" />
+                <ScalarProperty Name="flight_id" ColumnName="flight_id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
