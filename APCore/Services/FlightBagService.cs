@@ -447,8 +447,8 @@ namespace APCore.Services
             entity.SigxWXTypeId = EFBASR.SigxWXTypeId;
             entity.BSTurningId = EFBASR.BSTurningId;
 
-            entity.OPSStatusId = EFBASR.OPSStatusId;
-            entity.OPSStaffStatusId = EFBASR.OPSStaffStatusId;
+            entity.OPSStatusId = EFBASR.OPSStatusId ? 1:0;
+            entity.OPSStaffStatusId = EFBASR.OPSStaffStatusId? 1 :0;
 
 
             var saveResult = await _context.SaveAsync();

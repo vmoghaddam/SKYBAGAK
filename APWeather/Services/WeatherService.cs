@@ -600,13 +600,13 @@ namespace APWeather.Services
         {
             var stations = await _context.Airport.Where(q =>
             q.ICAO.StartsWith("OR")
-           // q.ICAO.StartsWith("OI") 
+            || q.ICAO.StartsWith("OI") 
            //|| q.ICAO.StartsWith("OR")
-           // || q.ICAO.StartsWith("UT")
-           // || q.ICAO.StartsWith("UG")
-           //  || q.ICAO.StartsWith("OK")
-           //  || q.ICAO.StartsWith("LT")
-           //  || q.ICAO.StartsWith("UDYZ")
+            || q.ICAO.StartsWith("UT")
+           || q.ICAO.StartsWith("UG")
+            || q.ICAO.StartsWith("OK")
+             || q.ICAO.StartsWith("LT")
+             || q.ICAO.StartsWith("UDYZ")
 
            ).Select(q => q.ICAO).ToListAsync();
 

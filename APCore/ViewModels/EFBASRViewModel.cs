@@ -98,8 +98,8 @@ namespace APCore.ViewModels
         public double? BSHeading { get; set; }
         public int? BSTurningId { get; set; }
         public string User { get; set; }
-        public int? OPSStatusId { get; set; }
-        public int? OPSStaffStatusId { get; set; }
+        public bool OPSStatusId { get; set; }
+        public bool OPSStaffStatusId { get; set; }
         public int Id { get; set; }
     }
 

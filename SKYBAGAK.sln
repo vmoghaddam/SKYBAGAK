@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEERJA", "NEERJA\NEERJA.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEERJACore", "NEERJACore\NEERJACore.csproj", "{A3C2DEDD-45FB-4921-9689-1AE0BA3AF7A8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UIKarun", "UIKarun\UIKarun.csproj", "{B93ACE4F-6C00-4134-9484-B393B3EAF46F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{A3C2DEDD-45FB-4921-9689-1AE0BA3AF7A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3C2DEDD-45FB-4921-9689-1AE0BA3AF7A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A3C2DEDD-45FB-4921-9689-1AE0BA3AF7A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B93ACE4F-6C00-4134-9484-B393B3EAF46F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B93ACE4F-6C00-4134-9484-B393B3EAF46F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B93ACE4F-6C00-4134-9484-B393B3EAF46F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B93ACE4F-6C00-4134-9484-B393B3EAF46F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
