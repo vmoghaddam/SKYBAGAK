@@ -1,0 +1,135 @@
+﻿<style>
+    .cls_item_x {
+        background: #aaa !important;
+        color: black;
+    }
+
+    .cls_item_s {
+        background: green !important;
+        color: white;
+    }
+
+    .cls_item_us {
+        background: red !important;
+        color: white;
+    }
+
+    .dx-slider-handle .dx-tooltip-wrapper .dx-overlay-content {
+        background-color: transparent;
+        transform: translate(-0.0017356px, 26px) !important;
+    }
+
+
+    .dx-slider-handle .dx-tooltip-wrapper.dx-popover-wrapper .dx-popover-arrow {
+        display: none
+    }
+
+
+    .dx-slider-handle .dx-tooltip-wrapper .dx-overlay-content .dx-popup-content {
+        color: white
+    }
+
+    .dx-placeholder {
+        margin-left: 5px
+    }
+
+    .dx-texteditor-input {
+        text-align: center;
+    }
+</style>
+<div ng-controller="eval_add_controller">
+
+
+    <div id="popup_add" dx-popup="popup_add" class="no-padding">
+        <div dx-select-box="sb_cabin" style="margin: 7px; border: 1px solid lightgray; height: 40px"></div>
+
+        <div style="width:100%; padding: 7px">
+            <table style="border:1px solid #ccc;color:black; width:100%" class="dx-border">
+                <tr>
+                    <td style="color: white; text-align: right; padding: 12px 18px 0 0" colspan="2">
+                        {{current_row[0].item_title}}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div style="height: 40px" dx-slider="sl_briefing"></div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="color: white; text-align: right; padding: 12px 18px 0 0" colspan="2">
+                        نحوه انجام
+                        وظایف قبل
+                        وهنگام ورود
+                        مسافران
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div style="height: 40px" dx-slider="sl_duty"></div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="color: white; text-align: right; padding: 12px 18px 0 0" colspan="2">
+                        کیفیت ارایه
+                        خدمات وجذب
+                        رضایت
+                        مسافران
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div style="height: 40px" dx-slider="sl_service"></div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="color: white; text-align: right; padding: 12px 18px 0 0" colspan="2">
+                        کیفیت
+                        وظایف
+                        ایمنی
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div style="height: 40px" dx-slider="sl_safety"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="color: white; text-align: right; padding: 12px 18px 0 0" colspan="2">
+                        روحیه همکاری
+                        تیمی وحفظ
+                        اموال شرکت
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        <div style="height: 40px" dx-slider="sl_team"></div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding: 15px; margin-bottom: 5px">
+                        <div style="height: 40px;" dx-number-box="num_total"></div>
+                    </td>
+                    <td style="color: white; text-align: right; padding: 0px 18px 0 0">
+                        مجموع
+                        نمرات
+                    </td>
+                </tr>
+
+
+            </table>
+        </div>
+
+
+
+
+    </div>
+
+
+    <div dx-load-panel="loadPanel"></div>
+</div>
+

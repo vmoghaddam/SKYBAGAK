@@ -2171,7 +2171,7 @@ app.factory('flightService', ['$http', '$q', 'ngAuthSettings', '$rootScope', fun
 
 
     };
-    //08-03
+    //08-10
 
     var _updateOFPB = function (entity) {
         var deferred = $q.defer();
@@ -2184,12 +2184,21 @@ app.factory('flightService', ['$http', '$q', 'ngAuthSettings', '$rootScope', fun
             case "root":
                 table = "OFPB_Root";
                 break;
+            case "nav":
+                table = "OFPB_MainNavLog";
+                break;
             default:
                 break;
         }
         var pk = -1;
         if (table == "OFPB_Root") {
             pk = entity.FlightId;
+        }
+        if (table == "OFPB_MainNavLog") {
+            var prop_parts = property.split('_');
+
+            pk = Number(prop_parts[1]);
+            property = prop_parts[0];
         }
         var upd = {};
         upd[property] = entity.PropValue;
@@ -2201,7 +2210,7 @@ app.factory('flightService', ['$http', '$q', 'ngAuthSettings', '$rootScope', fun
                     upd.date_update = response.data.Data.date_update;
                     upd.IsSynced = 1;
                     _db[table].update(pk, upd).then(function (updated) {
-                        
+                       // alert(pk + ' ' + table + ' ' + updated);
                         deferred.resolve({ Data: updated, IsSuccess: 1 });
 
                     });
@@ -2209,10 +2218,12 @@ app.factory('flightService', ['$http', '$q', 'ngAuthSettings', '$rootScope', fun
                 else {
                      //offline
                     //synced 0
+                    
+                    console.log(response.data);
                     upd.IsSynced = 0;
                     upd.date_update = Number(momentUtcNowStringSecond());
                     _db[table].update(pk, upd).then(function (updated) {
-
+                       
                         deferred.resolve({ Data: updated, IsSuccess: 1 });
 
                     });
@@ -2256,6 +2267,315 @@ app.factory('flightService', ['$http', '$q', 'ngAuthSettings', '$rootScope', fun
     };
     serviceFactory.updateOFPB = _updateOFPB;
 
+    
+    var _autoSyncOFPBNAV = function (callback) {
+        if (!$rootScope.is_auto_sync_enabled) {
+            console.log('is_auto_sync_enabled');
+            callback();
+            return;
+        }
+        var deferred = $q.defer();
+        
+
+        var _db = db.getDb();
+        _db.OFPB_MainNavLog
+            .filter(function (rec) {
+                return rec.IsSynced == 0;
+            }).toArray().then(function (points) {
+
+                console.log('dddddsss  vvv', points);
+                if (points && points.length > 0) {
+                    var items = [];
+
+                    $.each(points, function (_i, _d) {
+
+                        items.push({ id: _d.Id, eta: _d.ETA, ata: _d.ATA, remained: _d.FuelRemainedActual, used: _d.FuelUsedActual });
+                    });
+
+                    var dto = { items: items, user: $rootScope.userTitle };
+                    $http.post(apiapsb + 'api/ofp/sync/nav', dto).then(function (response) {
+                        if (response.data.IsSuccess) {
+
+                            $.each(points, function (_i, _d) {
+                                _d.IsSynced = 1;
+                                _d.date_update = response.data.Data.date_update;
+                            });
+                            _db.OFPB_MainNavLog.bulkPut(points).then(function (lastKey) {
+
+                                console.log("navlog synced " + lastKey); // Will be 100000.
+                                callback();
+                                deferred.resolve({});
+                            }).catch(Dexie.BulkError, function (e) {
+                                // Explicitly catching the bulkAdd() operation makes those successful
+                                // additions commit despite that there were errors.
+                                console.error("navlog synced error - db");
+                                callback();
+                                deferred.resolve({});
+                            });
+
+                        }
+
+                    }, function (err, status) {
+
+                        console.error("navlog synced error - server");
+                        callback();
+                        deferred.resolve({});
+                    });
+
+                }
+                else {
+                    callback();
+                    deferred.resolve({});
+                }
+              
+            });
+
+        return deferred.promise;
+
+    };
+    serviceFactory.autoSyncOFPBNAV = _autoSyncOFPBNAV;
+
+
+
+
+    var _autoSyncOFPB = function (callback) {
+        if (!$rootScope.is_auto_sync_enabled) {
+            console.log('is_auto_sync_enabled');
+            callback();
+            return;
+        }
+        var deferred = $q.defer();
+
+
+        var _db = db.getDb();
+        _db.OFPB_Root
+            .filter(function (rec) {
+                return rec.IsSynced == 0;
+            }).toArray().then(function (points) {
+
+                console.log('dddddsss  ofpbs', points);
+                if (points && points.length > 0) {
+                    var items = [];
+
+                    $.each(points, function (_i, _d) {
+
+                        items.push(_d);
+                    });
+
+                    var dto = { items: items, user: $rootScope.userTitle };
+                    $http.post(apiapsb + 'api/ofp/sync/root', dto).then(function (response) {
+                        if (response.data.IsSuccess) {
+
+                            $.each(points, function (_i, _d) {
+                                _d.IsSynced = 1;
+                                _d.date_update = response.data.Data.date_update;
+                            });
+                            _db.OFPB_Root.bulkPut(points).then(function (lastKey) {
+
+                                console.log("OFPB_Root synced " + lastKey); // Will be 100000.
+                                callback();
+                                deferred.resolve({});
+                            }).catch(Dexie.BulkError, function (e) {
+                                // Explicitly catching the bulkAdd() operation makes those successful
+                                // additions commit despite that there were errors.
+                                console.error("OFPB_Root synced error - db");
+                                callback();
+                                deferred.resolve({});
+                            });
+
+                        }
+
+                    }, function (err, status) {
+
+                        console.error("OFPB_Root synced error - server");
+                        callback();
+                        deferred.resolve({});
+                    });
+
+                }
+
+            });
+
+        return deferred.promise;
+
+    };
+    serviceFactory.autoSyncOFPB = _autoSyncOFPB;
+
+
+
+    var _updateOFPBBulk = function (table, dto) {
+        $rootScope.is_auto_sync_enabled = false;
+        var deferred = $q.defer();
+        var _db = db.getDb();
+        console.log('_updateOFPBBulk',dto);
+       // upd.IsSynced = 1;
+        var dto_bulk = {
+            user: $rootScope.userTitle,
+            items: dto
+        };
+        if ($rootScope.getOnlineStatus()  ) {
+            $http.post(apiapsb + 'api/ofp/update/eta/bulk', dto_bulk).then(function (response) {
+                if (response.data.IsSuccess) {
+                    
+                    $.each(dto, function (_i, _d) {
+                        _d.changes.IsSynced = 1;
+                        _d.changes.date_update = response.data.Data.date_update;
+                    });
+                    _db[table].bulkUpdate(dto).then(function (updated) {
+                        $rootScope.is_auto_sync_enabled = true;
+                        deferred.resolve({ Data: updated, IsSuccess: 1 });
+
+                    });
+
+
+
+                }
+                else {
+                    //offline
+                    //synced 0
+                     
+                    $.each(dto, function (_i, _d) {
+                        _d.changes.IsSynced = 1;
+                        _d.changes.date_update = Number(momentUtcNowStringSecond());
+                    });
+                    _db[table].bulkUpdate(dto).then(function (updated) {
+                        $rootScope.is_auto_sync_enabled = true;
+                        deferred.resolve({ Data: updated, IsSuccess: 1 });
+
+                    });
+                }
+
+            }, function (err, status) {
+                //offline
+                //synced 0
+                ShowNotify2("The application cannot connect to the Server. Please check your internet connection.", 'error');
+                    $.each(dto, function (_i, _d) {
+                        _d.changes.IsSynced = 1;
+                        _d.changes.date_update = Number(momentUtcNowStringSecond());
+                    });
+                    _db[table].bulkUpdate(dto).then(function (updated) {
+                        $rootScope.is_auto_sync_enabled = true;
+                        deferred.resolve({ Data: updated, IsSuccess: 1 });
+
+                    });
+            });
+        }
+        else {
+
+            //offline
+            //synced 0
+            //upd.IsSynced = 0;
+            //upd.date_update = Number(momentUtcNowStringSecond());
+            $.each(dto, function (_i, _d) {
+                _d.changes.IsSynced = 0;
+                _d.changes.date_update = Number(momentUtcNowStringSecond());
+            });
+            _db[table].bulkUpdate(dto).then(function (updated) {
+                $rootScope.is_auto_sync_enabled = true;
+                deferred.resolve({ Data: updated, IsSuccess: 1 });
+
+            });
+
+        }
+
+
+
+
+
+
+
+
+        return deferred.promise;
+    };
+    serviceFactory.updateOFPBBulk = _updateOFPBBulk;
+
+
+
+    var _updateOFPB_Nav_Fuel_Bulk = function (table, dto) {
+        $rootScope.is_auto_sync_enabled = false;
+        var deferred = $q.defer();
+        var _db = db.getDb();
+        console.log('_updateOFPB_Nav_Fuel_Bulk', dto);
+        // upd.IsSynced = 1;
+        var dto_bulk = {
+            user: $rootScope.userTitle,
+            items: dto
+        };
+        if ($rootScope.getOnlineStatus()) {
+            $http.post(apiapsb + 'api/ofp/update/fuel/bulk', dto_bulk).then(function (response) {
+                if (response.data.IsSuccess) {
+
+                    $.each(dto, function (_i, _d) {
+                        _d.changes.IsSynced = 1;
+                        _d.changes.date_update = response.data.Data.date_update;
+                    });
+                    _db[table].bulkUpdate(dto).then(function (updated) {
+                        $rootScope.is_auto_sync_enabled = true;
+                        deferred.resolve({ Data: updated, IsSuccess: 1 });
+
+                    });
+
+
+
+                }
+                else {
+                    //offline
+                    //synced 0
+
+                    $.each(dto, function (_i, _d) {
+                        _d.changes.IsSynced = 1;
+                        _d.changes.date_update = Number(momentUtcNowStringSecond());
+                    });
+                    _db[table].bulkUpdate(dto).then(function (updated) {
+                        $rootScope.is_auto_sync_enabled = true;
+                        deferred.resolve({ Data: updated, IsSuccess: 1 });
+
+                    });
+                }
+
+            }, function (err, status) {
+                //offline
+                //synced 0
+                ShowNotify2("The application cannot connect to the Server. Please check your internet connection.", 'error');
+                $.each(dto, function (_i, _d) {
+                    _d.changes.IsSynced = 1;
+                    _d.changes.date_update = Number(momentUtcNowStringSecond());
+                });
+                _db[table].bulkUpdate(dto).then(function (updated) {
+                    $rootScope.is_auto_sync_enabled = true;
+                    deferred.resolve({ Data: updated, IsSuccess: 1 });
+
+                });
+            });
+        }
+        else {
+
+            //offline
+            //synced 0
+            //upd.IsSynced = 0;
+            //upd.date_update = Number(momentUtcNowStringSecond());
+            $.each(dto, function (_i, _d) {
+                _d.changes.IsSynced = 0;
+                _d.changes.date_update = Number(momentUtcNowStringSecond());
+            });
+            _db[table].bulkUpdate(dto).then(function (updated) {
+                $rootScope.is_auto_sync_enabled = true;
+                deferred.resolve({ Data: updated, IsSuccess: 1 });
+
+            });
+
+        }
+
+
+
+
+
+
+
+
+        return deferred.promise;
+    };
+    serviceFactory.updateOFPB_Nav_Fuel_Bulk = _updateOFPB_Nav_Fuel_Bulk;
 
     var _saveOFPPropB = function (entity) {
         console.log('save ofp prop - propname', entity);

@@ -117,7 +117,7 @@ app.controller('epLogBookController', ['$scope', '$location', '$routeParams', '$
     };
     //  $scope.dt_from = new Date(2021,9, 28);
     //  $scope.dt_to = new Date(2021, 7, 26);
-    $scope.dt_from = (new Date()).addDays(-5);
+    $scope.dt_from = (new Date());//.addDays(-10);
     $scope.dt_to = (new Date($scope.dt_from)).addDays(0);
     $scope.date_from = {
         displayFormat: "yy MMM dd",
@@ -659,7 +659,7 @@ app.controller('epLogBookController', ['$scope', '$location', '$routeParams', '$
                         var dto = { FlightId: $scope.selectedFlight.FlightId
 						, Due: $scope.selectedFlight.ALT3
 						, Fuel: $scope.selectedFlight.FuelPlanned 
-						,Tankering:$scope.selectedFlight.ACTUALTANKERINGFUEL
+						  ,Tankering:0//$scope.selectedFlight.ACTUALTANKERINGFUEL
 						};
                         $scope.loadingVisible = true;
                         flightService.saveRequestedFuel(dto).then(function (response) {
@@ -2287,7 +2287,7 @@ app.controller('epLogBookController', ['$scope', '$location', '$routeParams', '$
         }
     };
     $scope.bindInfo = function (grps) {
-        return;
+        
         var _grps = [];
         $.each(grps, function (_i, _g) {
             if (_g.DutyType == 1165) {
@@ -2330,11 +2330,11 @@ app.controller('epLogBookController', ['$scope', '$location', '$routeParams', '$
                         });
                         var _fdto = { ids: grpsFlightIds };
 
-
+                        
                         flightService.epGetOFPByFlights_B(_fdto, function () {  /*$scope.popup_loading_visible = true;*/ }).then(function (_taf) {
                             /*$scope.popup_loading_visible = false;*/
 
-
+                           
 
 
                         }, function (err) { });

@@ -1,0 +1,240 @@
+﻿<style>
+    .cls_item_x {
+        background: #aaa !important;
+        color: black;
+    }
+
+    .cls_item_s {
+        background: green !important;
+        color: white;
+    }
+
+    .cls_item_us {
+        background: red !important;
+        color: white;
+    }
+</style>
+<div ng-controller="scc_add_controller">
+
+
+    <div id="popup_add" dx-popup="popup_add" class="no-padding">
+
+
+
+        <div style="padding:5px;">
+
+            <div dx-tabs="tabs_options" class="gray">
+
+            </div>
+            <div id="scc_flight" style="display:none;height:100%" class="tabscc" ng-show="isContentVisible">
+                <div id="scroll_scc_flt" dx-scroll-view="scroll_scc_flt" style="margin-top:5px">
+                    <div style="padding:5px;">
+
+
+
+                        <div style="padding:0px;" class="main-bkcolor2-light-impx">
+
+                            <table class="section-table">
+
+                                <tr>
+                                    <td colspan="2">
+                                        Date
+                                    </td>
+                                    <td colspan="2">
+                                        <span style="display:inline-block">{{formatDateLong(selectedFlight.STDDay)}}</span>
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        Flight#
+                                    </td>
+                                    <td colspan="2">
+                                        <span style="display:inline-block">{{selectedFlight.FlightNumber}} </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        From
+                                    </td>
+                                    <td style="border-right: 1px dotted #bbb">
+                                        <span style="display:inline-block">{{selectedFlight.FromAirportIATA}}</span>
+                                    </td>
+                                    <td>
+                                        To
+                                    </td>
+                                    <td>
+                                        <span style="display:inline-block">{{selectedFlight.ToAirportIATA}}</span>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        STD
+                                    </td>
+                                    <td style="border-right: 1px dotted #bbb">
+                                        <span style="display:inline-block">{{getSTD(selectedFlight)}}</span>
+
+                                    </td>
+
+
+
+                                    <td>
+
+
+
+                                        STA
+                                    </td>
+                                    <td>
+                                        <span style="display:inline-block">{{getSTA(selectedFlight)}}</span>
+
+                                    </td>
+                                </tr>
+
+
+
+
+                            </table>
+
+                        </div>
+                        <div style="padding:7px;border-bottom:1px solid #eee" class="section-header">Time</div>
+                        <div style="padding:0px;" class="main-bkcolor2-light-impx">
+                            <table class="section-table">
+                                <tr>
+                                    <td>
+                                        Block Time
+                                    </td>
+                                    <td style="border-right: 1px dotted #bbb">
+                                        <span style="display:inline-block">
+                                            {{getDuration(selectedFlight.BlockTime)}}
+                                        </span>
+
+                                    </td>
+                                    <td>
+                                        Flight Time
+                                    </td>
+                                    <td>
+                                        <span style="display:inline-block">{{getDuration(selectedFlight.FlightTime)}}</span>
+                                    </td>
+                                </tr>
+
+
+                                <tr>
+                                    <td>
+                                        Night
+                                    </td>
+                                    <td style="border-right: 1px dotted #bbb">
+                                        <span style="display:inline-block"></span>
+                                    </td>
+                                    <td>
+                                        Scheduled
+                                    </td>
+                                    <td>
+                                        <span style="display:inline-block">{{getDuration(selectedFlight.ScheduledFlightTime)}}</span>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td colspan="2">
+                                        Total Delay
+                                    </td>
+                                    <td colspan="2">
+                                        <span style="display:inline-block;color:#ffb84d">{{getDuration(selectedFlight.DelayBlockOff)}}</span>
+                                    </td>
+                                </tr>
+
+                            </table>
+                        </div>
+                        <div style="padding:7px;border-bottom:1px solid #eee" class="section-header">Passenger</div>
+                        <div style="padding:0px;" class="main-bkcolor2-light-impx">
+                            <table class="section-table">
+                                <tr>
+                                    <td>
+                                        Adult
+                                    </td>
+                                    <td style="border-right: 1px dotted #bbb">
+                                        <span style="display:inline-block"> {{selectedFlight.PaxAdult}}</span>
+                                    </td>
+                                    <td>
+                                        Child
+                                    </td>
+                                    <td>
+                                        <span style="display:inline-block">{{selectedFlight.PaxChild}}</span>
+                                    </td>
+                                </tr>
+
+
+                                <tr>
+                                    <td>
+                                        Infant
+                                    </td>
+                                    <td style="border-right: 1px dotted #bbb">
+                                        <span style="display:inline-block">{{selectedFlight.PaxInfant}}</span>
+                                    </td>
+                                    <td>
+                                        Total
+                                    </td>
+                                    <td>
+                                        <span style="display:inline-block">{{selectedFlight.PaxTotal}}</span>
+                                    </td>
+                                </tr>
+
+
+
+                            </table>
+                        </div>
+                        <div style="padding:7px;border-bottom:1px solid #eee" class="section-header">Crew</div>
+                        <div style="padding:0px;" class="main-bkcolor2-light-impx">
+                            <table class="section-table">
+                                <tr ng-repeat="c in selectedFlightCrews">
+                                    <td>
+                                        <span ng-show="!c.IsPositioning" style="display:inline-block">{{c.Position}}</span>
+                                        <span ng-show="c.IsPositioning" style="display:inline-block">Positioning({{c.JobGroup}})</span>
+                                    </td>
+                                    <td style="width:70% !important">
+                                        <span style="display:inline-block">{{c.Name}}</span>
+                                    </td>
+                                </tr>
+
+
+                            </table>
+                        </div>
+
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
+
+            <div id="scc_report" style="display:none;height:100%" class="tabscc" ng-show="isContentVisible">
+                <div id="scroll_scc" dx-scroll-view="scroll_scc" style="margin-top:5px">
+                    <div style="padding:5px;" class="dx-border">
+                        <div style="margin-bottom:10px;">Catering Issue</div>
+                        <div dx-text-area="txt_catering"></div>
+                        <div style="margin-bottom:10px;margin-top:15px;">Airport Service</div>
+                        <div dx-text-area="txt_airport"></div>
+                        <div style="margin-bottom:10px;margin-top:15px;">Technical (Cabin Interior)</div>
+                        <div dx-text-area="txt_tech"></div>
+                        <div style="margin-bottom:10px;margin-top:15px;">Safety Issue</div>
+                        <div dx-text-area="txt_safety"></div>
+                        <div style="margin-bottom:10px;margin-top:15px;">General Issue</div>
+                        <div dx-text-area="txt_general"></div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+        </div>
+
+    </div>
+
+
+    <div dx-load-panel="loadPanel"></div>
+</div>
+

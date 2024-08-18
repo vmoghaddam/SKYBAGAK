@@ -1,0 +1,80 @@
+﻿<style>
+    .cls_item_x {
+        background: #aaa !important;
+        color:black;
+    }
+    .cls_item_s {
+        background: green !important;
+        color: white;
+    }
+    .cls_item_us {
+        background: red !important;
+        color: white;
+    }
+</style>
+<div ng-controller="preflight_add_controller">
+
+
+    <div id="popup_add" dx-popup="popup_add" class="no-padding">
+
+        <div style="padding:5px;">
+            <div style="padding:10px 5px 5px 5px;" ng-show="isContentVisible">
+                <table style="width:100%;border:2px solid #eee;text-align:center">
+                    <tr style="border-bottom:2px solid #eee">
+                        <td style="padding:7px;border-right:1px dotted #eee">{{flight.FromAirportIATA}}</td>
+                        <td style="padding:7px;border-right:1px dotted #eee">{{flight.FlightNumber}}</td>
+                        <td style="padding:7px;">{{flight.ToAirportIATA}}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:7px;border-right:1px dotted #eee">{{getSTD(flight)}}</td>
+                        <td style="padding:7px;border-right:1px dotted #eee">{{formatDateLong(flight.STDDay)}}</td>
+                        <td style="padding:7px;">{{getSTA(flight)}}</td>
+                    </tr>
+
+                </table>
+            </div>
+
+            <div id="scroll_pfc" dx-scroll-view="scroll_pfc" style="margin-top:5px">
+                <div style="padding:5px;">
+
+                    <div ng-repeat="grp in pfc_grouped" style="margin-bottom:10px">
+                        <div style="border:1px solid lightgray;">
+                            <div style="background-color:lightgray;padding:7px;text-align:left;color:black;font-weight:bold;color:black">{{grp.category}}</div>
+                            <div style="padding:10px;">
+                                <div ng-repeat="x in grp.items">
+                                    <div style="padding:5px 0 5px 0; border-bottom:1px dotted #ccc">
+                                        <table style="width:100%;">
+                                            <tr>
+                                                <td> {{x.item_title}}</td>
+                                                <td style="width:50px;">
+                                                    <div style="background:#aaa;text-align:center;height:40px;line-height:40px;border-radius:10px;font-size:19px" ng-click="item_click(x.item_id,grp.category_id)" ng-class="get_item_class(x.item_id,grp.category_id)">
+                                                        {{get_item_result(x.item_id,grp.category_id)}}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <div style="margin-top:5px;">
+                                            <textarea   rows="2"   style="color:#404040;background:#eee;text-align:justify;width:100%;direction:rtl;font-size:13px" ng-model="x.remark"></textarea>
+                                        </div>
+                                       
+                                    </div>
+
+                                </div>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div dx-load-panel="loadPanel"></div>
+</div>
+

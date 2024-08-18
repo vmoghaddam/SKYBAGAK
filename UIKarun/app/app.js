@@ -609,7 +609,7 @@ app.run(['authService', 'activityService', '$rootScope', '$location', '$template
             $rootScope.onlineStatusChanged();
 
         });
-    }, 80 * 1000);
+    }, 10 * 1000);
 	$rootScope.checkInternet2 = function (callback) {
         //flightService.checkInternet(callback);
 		   $.ajax({
@@ -625,7 +625,8 @@ app.run(['authService', 'activityService', '$rootScope', '$location', '$template
  //     $rootScope.checkInternet2(function(st){console.log(st);});
 		 
        
-  //  }, 10 * 1000);
+    //  }, 10 * 1000);
+    $rootScope.is_auto_sync_enabled = true;
     $rootScope.onlineStatusChanged = function () {
     
         if ($rootScope.getOnlineStatus()) {
@@ -636,13 +637,19 @@ app.run(['authService', 'activityService', '$rootScope', '$location', '$template
                 if (st) {
                     flightService.autoSyncLogsNew(function (data) {
 
-                        console.log('Synced Log Result ', data);
+                       // console.log('Synced Log Result ', data);
+                        flightService.autoSyncOFPBNAV(function (data) {
+                           
+                            flightService.autoSyncOFPB(function (data) { });
+                        });
 
                     });
-                    flightService.autoSyncASR(function (data) { });
-                    flightService.autoSyncVR(function (data) { });
-                    flightService.autoSyncDR(function (data) { });
-                    flightService.autoSyncOFPProp(function (data) { });
+                   // flightService.autoSyncASR(function (data) { });
+                  //  flightService.autoSyncVR(function (data) { });
+                  //  flightService.autoSyncDR(function (data) { });
+
+                     
+                    
                 }
                 else {
 

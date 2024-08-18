@@ -467,31 +467,233 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
             return 0;
         }
     };
+    var str_to_num = function (str) {
+        if (!str) {
+            if (str == '0')
+                return 0;
+
+            return null;
+        }
+        else
+            return Number(str);
+    }
+    var correct_number = function (str) {
+        if (!str)
+            return "";
+        str = str.toString();
+        str = str.replaceAll(" ", "");
+        if (str == "")
+            return str;
+
+        try {
+            var n = Number(str);
+            if (isNaN(n))
+                return "";
+            return n.toString();
+        }
+        catch (e) {
+            return "";
+        }
+    }
     $scope.getPropClass = function (id) {
 
         if (id.includes('fuel_req'))
             return 'prop noborder';
         return 'prop';
     };
-    $scope.updateValue = function (propId, value) {
-        //12-04
 
+    //08-11
+    $scope.fillSOB = function () {
+        // alert(Number($scope.entity.root.pax_adult));
+        //alert(Number($scope.entity.root.pax_child));
+        // alert(Number($scope.entity.root.pax_infant));
+        var _sob = ($scope.entity.root.pax_adult ? Number($scope.entity.root.pax_adult) : 0)
+            + ($scope.entity.root.pax_child ? Number($scope.entity.root.pax_child) : 0)
+            + ($scope.entity.root.pax_infant ? Number($scope.entity.root.pax_infant) : 0)
+
+            + ($scope.entity.root.crew_cockpit ? Number($scope.entity.root.crew_cockpit) : 0)
+            + ($scope.entity.root.crew_cabin ? Number($scope.entity.root.crew_cabin) : 0)
+            + ($scope.entity.root.crew_fsg ? Number($scope.entity.root.crew_fsg) : 0)
+            + ($scope.entity.root.crew_fm ? Number($scope.entity.root.crew_fm) : 0)
+            + ($scope.entity.root.crew_dh ? Number($scope.entity.root.crew_dh) : 0);
+        
+        // alert(_sob);
+
+        $('#prop-root-sob').val(_sob);
+        return _sob;
+    }
+    $scope.update_entity = function (dto) {
+        var prts = dto.PropName.split('-');
+        var property = prts[2];
+        var tbl_part = prts[1];
+        switch (tbl_part) {
+            case "root":
+                $scope.entity.root[property] = dto.PropValue;
+                break;
+            case "nav":
+                var prop_parts = property.split('_');
+
+                var pk = prop_parts[1];
+                property = prop_parts[0];
+                var obj = Enumerable.From($scope.init_data.routes).Where(function (x) { return x.Id == Number(pk) }).FirstOrDefault();
+                if (obj) {
+                    var coll = $scope.entity.main_route;
+                    if (obj.NavType == "ALT1")
+                        coll = $scope.entity.alt1_route;
+                    if (obj.NavType == "ALT2")
+                        coll = $scope.entity.alt2_route;
+
+                    var objx = Enumerable.From(coll).Where(function (x) { return x.Id == Number(pk) }).FirstOrDefault();
+                    // objx.WayPoint = 'dool';
+
+
+                    objx[property] = dto.PropValue;
+
+                }
+
+
+
+                break;
+            default:
+                break;
+        }
+    }
+    //08-11
+    $scope.updateValue = function (propId, value, callback, prev,norecal) {
+        //12-04
+        if (propId.includes('undefined'))
+            return;
         if (propId == sobId) {
 
             return;
         }
-        var dto = { OFPId: $scope.entity.Id, PropName: propId, User: $rootScope.userTitle,FlightId: $scope.entity.FlightId };
+        var dto = { OFPId: $scope.entity.Id, PropName: propId, User: $rootScope.userTitle, FlightId: $scope.entity.FlightId };
 
+
+        
+        if (propId.toLowerCase().includes('fuel') || propId.toLowerCase().includes('payload_actual')) {
+          
+            value = correct_number(value);
+            $('#' + propId).val(value);
+        }
+
+        if (propId.toLowerCase().includes('nav-ata')) {
+            value = value.replaceAll(" ", "");
+            if (value != "") {
+                if (value.length < 4) {
+                    $('#' + propId).val(prev);
+                    return;
+                }
+                // var to = _toNum(tos.substr(0, 2)) * 60 + _toNum(tos.substr(2, 2));
+                var p1 = value.substr(0, 2);
+                var p2 = value.substr(2, 2);
+                if (Number(p1) > 24 || Number(p2) > 59) {
+                    $('#' + propId).val(prev);
+                    return;
+                }
+
+
+            }
+            //value = correct_number(value);
+            //  $('#' + propId).val(value);
+        }
         dto.PropValue = value;
         // $scope.loadingVisible = true;
 
-        console.log('prop_dto', dto);
-        
+     //   console.log('prop_dto', dto);
+
         //flightService.saveOFPPropB(dto).then(function (response2) {
         flightService.updateOFPB(dto).then(function (response2) {
+            $scope.update_entity(dto);
+            if (propId.toLowerCase().includes('_corr') && !propId.toLowerCase().includes('fuel_req_corr') && !propId.toLowerCase().includes('fuel_total_corr') && !norecal) {
+                $scope.corr_fuel_all($scope.entity);
+            }
 
-            
+            if (propId.toLowerCase().includes('fuel_req_corr')  && !norecal) {
+                $scope.corr_fuel_req($scope.entity);
+            }
 
+            if (!norecal && propId.toLowerCase().includes('payload_actual') /*|| propId.toLowerCase().includes('_corr')*/   || propId.toLowerCase().includes('dow_actual')  ) {
+                $scope.calculate_wb($scope.entity);
+            }
+
+            if (propId.toLowerCase().includes('fuel_trip_corr') && !norecal) {
+                $scope.calculate_wb($scope.entity);
+            }
+            if (propId.toLowerCase().includes('fuel_total_corr') && !norecal) {
+               
+                $scope.calculate_wb($scope.entity);
+            }
+
+
+
+
+
+            if (propId.includes('pax') || propId.includes('crew')) {
+                var _sob = $scope.fillSOB();
+                $scope.updateValue('prop-root-sob', _sob, null);
+
+            }
+
+
+            if (propId.toLowerCase().includes('nav-ata')) {
+                var xs = propId.split('_');
+                var xid = Number(xs[xs.length - 1]);
+
+                var rt = Enumerable.From($scope.init_data.routes).Where(function (x) { return Number(x.Id) == xid; }).FirstOrDefault();
+                if (rt) {
+                    var type = "main";
+                    var coll = null;
+                    if (rt.NavType == "MAIN")
+                        coll = $scope.entity.main_route;
+                    if (rt.NavType == "ALT1") { coll = $scope.entity.alt1_route; type = "alt"; }
+                    if (rt.NavType == "ALT2") { coll = $scope.entity.alt2_route; type = "alt"; }
+                    $scope.fill_eta(coll, type, function () {
+                        $scope.eta_upd_dto = [];
+                        $scope.save_eta();
+                    }, true);
+                }
+
+            }
+
+            if (propId.includes('prop-nav-FuelRemainedActual')) {
+                var xs = propId.split('_');
+                var xid = Number(xs[xs.length - 1]);
+                var rt = Enumerable.From($scope.init_data.routes).Where(function (x) { return Number(x.Id) == xid; }).FirstOrDefault();
+                if (rt) {
+                    var _diff_rem = 'prop-nav-DiffFuelRemained_' + xid;
+                    var _diff_used = 'prop-nav-DiffFuelUsed_' + xid;
+                    var _act_used = 'prop-nav-FuelUsedActual_' + xid;
+                    var _used = null;
+                    if (value == '') {
+                        $('#' + _diff_rem).val('').removeClass('orange').removeClass('green');
+                        $('#' + _diff_used).val('');
+                        $('#' + _act_used).val('');
+                        rt.DiffFuelRemained = '';
+
+                    }
+                    else {
+                        var _rem = Number(value) - Number(rt.FuelRemained2);
+                        rt.DiffFuelRemained = _rem;
+                        var cls = 'green';
+                        if (_rem < 0)
+                            cls = 'orange';
+                        $('#' + _diff_rem).val(_rem).removeClass('orange').removeClass('green').addClass(cls);
+                        _used = Number(rt.FuelUsed2) - _rem;
+                        $('#' + _act_used).val(_used);
+                        $scope.entity.root.FuelUsedActual = _used;
+
+                        var _used_diff = Number(rt.FuelUsed2) - _used;
+                        $('#' + _diff_used).val(_used_diff);
+
+                    }
+                     
+                    $scope.updateValue(_act_used, _used, null);
+
+                }
+            }
+            if (callback)
+                callback();
 
             //$scope.fillSOB();
 
@@ -512,7 +714,8 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
     };
     //12-04
     $scope.onBlur = function (propId, value, prev) {
-        $scope.updateValue(propId, value);
+
+        $scope.updateValue(propId, value, null, prev);
         return;
         var _v = (value === undefined || (!value && value !== 0)) ? value : value.toString().replace(/\s/g, '');
         if ((!_v && _v !== 0) || _v === undefined) {
@@ -522,7 +725,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
         }
         else {
-
+            //qqww
             $scope.updateValue(propId, value);
         }
 
@@ -621,26 +824,540 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
 
     $scope.convert_nav_time = function (pts) {
-        
+
         $.each(pts, function (_i, _d) {
             if (_d.ZoneTime) {
-                var prts = _d.ZoneTime.split('.');
+                var prts = _d.ZoneTime.split(':');
                 _d.ZoneTimeInt = Number(prts[0]) * 60 + Number(prts[1]);
             }
             else
                 _d.ZoneTimeInt = 0;
-           
+
             if (_d.CumulativeTime) {
-                var prtsc = _d.CumulativeTime.split('.');
+                var prtsc = _d.CumulativeTime.split(':');
                 _d.CumulativeTimeInt = Number(prtsc[0]) * 60 + Number(prtsc[1]);
             }
             else _d.CumulativeTimeInt = 0;
-           
+
         })
     }
+
+
+    $scope.init_data = null;
+    $scope.offblock = null;
+    $scope.takeoff = null;
+    $scope.landing = null;
+    $scope.onblock = null;
+    $scope.fillETA = function () {
+        if ($scope.flight.TakeOff) {
+            var tos = moment(CreateDate($scope.flight.TakeOff)).format('HHmm');
+            var to = _toNum(tos.substr(0, 2)) * 60 + _toNum(tos.substr(2, 2));
+
+            $.each($scope.entity.JPlan, function (_i, _d) {
+                var mm = _toNum(_d.TTM.split(':')[0]) * 60 + _toNum(_d.TTM.split(':')[1]);
+
+                if (_i == 0) {
+                    var n = mm + to;
+                    $('#prop_' + _d._key + '_eta_' + _i).val(time_convert(n));
+                    _d.eta = time_convert(n);
+                }
+                else {
+                    var pre = $scope.entity.JPlan[_i - 1];
+                    //var pre_eta = $('#prop_' + _d._key + '_eta_' + (_i - 1).toString()).val();
+                    var pre_eta = pre.eta;
+                    var pre_ata = $('#prop_' + pre._key + '_ata_' + (_i - 1).toString()).val();
+                    var _t = pre_ata ? pre_ata : pre_eta;
+
+                    var _tn = _toNum(_t.substr(0, 2)) * 60 + _toNum(_t.substr(2, 2));
+                    _tn += _toNum(_d.TME.split(':')[0]) * 60 + _toNum(_d.TME.split(':')[1]);
+                    $('#prop_' + _d._key + '_eta_' + _i).val(time_convert(_tn));
+                    _d.eta = time_convert(_tn);
+                }
+
+                //var _base = CreateDate($scope.flight.TakeOff);
+                //var _eta = new Date(_base.addMinutes(mm));
+                // $('#prop_' + _d._key + '_eta_' + _i).val(toTime(_eta));
+            });
+        }
+    }
+    function time_convert(num) {
+        var hours = Math.floor(num / 60);
+        var minutes = num % 60;
+        return hours.toString().padStart(2, '0') + minutes.toString().padStart(2, '0');
+    }
+
+
+    $scope.nowClick2 = function (key) {
+
+        var _id = key;
+        var $elem = $('#' + _id);
+        var dt = new Date();
+        var _val = String(dt.getUTCHours()).padStart(2, '0') + String(dt.getUTCMinutes()).padStart(2, '0');
+        $scope.entity.root[_id.replace("prop-root-", "")] = _val;
+        $elem.val(_val);
+        $scope.updateValue(_id, _val, function () {
+
+            //  $scope.fill_eta(coll, type, function () { },true);
+        });
+    };
+
+    $scope.now_ata = function (id, type) {
+
+        var coll = null;
+        if (type == 'main')
+            coll = $scope.entity.main_route;
+        if (type == 'alt1')
+            coll = $scope.entity.alt1_route;
+        if (type == 'alt2')
+            coll = $scope.entity.alt2_route;
+
+        var rec = Enumerable.From(coll).Where(function (x) { return Number(x.Id) == id; }).FirstOrDefault();
+        var rec_x = Enumerable.From($scope.init_data.routes).Where(function (x) { return Number(x.Id) == id; }).FirstOrDefault();
+
+        var dt = new Date();
+        var _val = String(dt.getUTCHours()).padStart(2, '0') + String(dt.getUTCMinutes()).padStart(2, '0');
+
+        rec.ATA = _val;
+        rec_x.ATA = _val;
+        var $elem = $('#prop-nav-ATA_' + id);
+        $elem.val(_val);
+        $scope.updateValue('#prop-nav-ATA_' + id, _val, function () {
+
+            //  $scope.fill_eta(coll, type, function () { },true);
+        });
+
+
+
+
+
+
+    };
+    //08-12
+    $scope.recalculate_fuel_diff = function (callback) {
+        var points = ($scope.entity.main_route.concat($scope.entity.alt1_route)).concat($scope.entity.alt2_route);
+        
+        $.each(points, function (_i, _p) {
+            if (_p.FuelRemainedActual) {
+                _p.DiffFuelRemained = +_p.FuelRemainedActual - _p.FuelRemained2;
+                _p.FuelUsedActual = Number(_p.FuelUsed2) - _p.DiffFuelRemained;
+
+
+                var upd_dto_rec = {
+                    key: Number(_p.Id),
+                    changes: {
+                        //DiffFuelRemained: _p.DiffFuelRemained,
+                        FuelUsedActual: _p.FuelUsedActual,
+                        IsFuelUsedActual:true,
+
+                    }
+                };
+                $scope.navlog_upd_dto.push(upd_dto_rec);
+
+            }
+           
+            
+        });
+
+
+        callback();
+    }
+    $scope.fill_route_fuel = function (route, type, callback, refresh) {
+        var first_fuel = Number($scope.ref_fuel);
+        var diff_used = 0;
+        if (type == "main") {
+            var taxi = Number($scope.entity.root.fuel_taxi_corr ? $scope.entity.root.fuel_taxi_corr : $scope.entity.root.fuel_taxiout);
+            diff_used = taxi - Number($scope.entity.root.fuel_taxiout);
+            first_fuel = first_fuel - taxi;
+            route[0].FuelUsed2 = Number(route[0].FuelUsed) + diff_used;
+        }
+        if (type == "alt") {
+            var taxi = Number($scope.entity.root.fuel_taxi_corr ? $scope.entity.root.fuel_taxi_corr : $scope.entity.root.fuel_taxiout);
+            var trip = Number($scope.entity.root.fuel_trip_corr ? $scope.entity.root.fuel_trip_corr : $scope.entity.root.fuel_trip);
+
+
+            first_fuel = Number($scope.ref_fuel) - trip - taxi;
+            route[0].FuelUsed2 = trip + taxi;
+
+
+
+
+        }
+        var diff = first_fuel - route[0].FuelRemained;
+
+        $.each(route, function (_i, _p) {
+
+
+            _p.FuelRemained2 = Number(_p.FuelRemained) + diff;
+            if (_i > 0)
+                _p.FuelUsed2 = _p.FuelUsed;
+            //if (_p.FuelRemainedActual) {
+
+            //    var _rem = Number(_p.FuelRemainedActual) - Number(_p.FuelRemained);
+            //    _p.DiffFuelRemained = _rem;
+
+            //    var _used = Number(_p.FuelUsed) - _rem;
+            //    _p.FuelUsedActual = _used;
+
+
+
+            //}
+            var upd_dto_rec = {
+                key: Number(_p.Id),
+                changes: {
+                    FuelUsed2: _p.FuelUsed,
+                    FuelRemained2: _p.FuelRemained2,
+                    IsFuelUsed2: true,
+                    IsFuelRemained2:true,
+
+                }
+            };
+            $scope.navlog_upd_dto.push(upd_dto_rec);
+
+        });
+
+        callback();
+
+    }
+
+    $scope.recalculate_fuel = function (data, callback) {
+        $scope.navlog_upd_dto = [];
+
+        $scope.fill_route_fuel(data.main_route, 'main', function () {
+            $scope.fill_route_fuel(data.alt1_route, 'alt', function () {
+
+
+
+
+                $scope.recalculate_fuel_diff(function () {
+
+                    flightService.updateOFPB_Nav_Fuel_Bulk('OFPB_MainNavLog', $scope.navlog_upd_dto).then(function (sdata) {
+                        $.each(data.main_route, function (_i, _w) {
+                            $('#prop-nav-ETA_' + _w.Id).val(_w.ETA);
+                            $('#prop-nav-ATA_' + _w.Id).val(_w.ATA);
+                            //prop-nav-FuelRemainedActual_
+                            $('#prop-nav-FuelRemainedActual_' + _w.Id).val(_w.FuelRemainedActual);
+                            //prop-nav-FuelUsedActual_
+                            $('#prop-nav-FuelUsedActual_' + _w.Id).val(_w.FuelUsedActual);
+                            var cls = '';
+                            if (_w.DiffFuelRemained) {
+
+                                if (Number(_w.DiffFuelRemained) < 0)
+                                    cls = 'orange';
+                                else
+                                    cls = 'green';
+                            }
+
+                            $('#prop-nav-DiffFuelRemained_' + _w.Id).val(_w.DiffFuelRemained).removeClass('orange').removeClass('green').addClass(cls);
+
+
+                        });
+                        $.each(data.alt1_route, function (_i, _w) {
+                            $('#prop-nav-ETA_' + _w.Id).val(_w.ETA);
+                            $('#prop-nav-ATA_' + _w.Id).val(_w.ATA);
+                            //prop-nav-FuelRemainedActual_
+                            $('#prop-nav-FuelRemainedActual_' + _w.Id).val(_w.FuelRemainedActual);
+                            //prop-nav-FuelUsedActual_
+                            $('#prop-nav-FuelUsedActual_' + _w.Id).val(_w.FuelUsedActual);
+                            var cls = '';
+                            if (_w.DiffFuelRemained) {
+                                if (Number(_w.DiffFuelRemained) < 0)
+                                    cls = 'orange';
+                                else
+                                    cls = 'green';
+                            }
+                            $('#prop-nav-DiffFuelRemained_' + _w.Id).val(_w.DiffFuelRemained).removeClass('orange').removeClass('green').addClass(cls);;
+                        });
+
+                        $.each(data.alt2_route, function (_i, _w) {
+                            $('#prop-nav-ETA_' + _w.Id).val(_w.ETA);
+                            $('#prop-nav-ATA_' + _w.Id).val(_w.ATA);
+                            //prop-nav-FuelRemainedActual_
+                            $('#prop-nav-FuelRemainedActual_' + _w.Id).val(_w.FuelRemainedActual);
+                            //prop-nav-FuelUsedActual_
+                            $('#prop-nav-FuelUsedActual_' + _w.Id).val(_w.FuelUsedActual);
+                            var cls = '';
+                            if (_w.DiffFuelRemained) {
+                                if (Number(_w.DiffFuelRemained) < 0)
+                                    cls = 'orange';
+                                else
+                                    cls = 'green';
+                            }
+                            $('#prop-nav-DiffFuelRemained_' + _w.Id).val(_w.DiffFuelRemained).removeClass('orange').removeClass('green').addClass(cls);;
+                        });
+
+
+                        if (callback)
+                            callback();
+
+
+                         
+                    });
+
+                    
+
+                });
+                
+
+
+            });
+
+
+        });
+
+
+
+        /////////////////////
+
+    }
+
+
+    $scope.save_eta = function () {
+
+        flightService.updateOFPBBulk('OFPB_MainNavLog', $scope.eta_upd_dto).then(function (sdata) {
+             
+            $scope.eta_upd_dto = [];
+        });
+    }
+   
+
+    $scope.eta_upd_dto = [];
+    $scope.fill_eta = function (route, type, callback, refresh) {
+       
+        var c = 0;
+        var start = $scope.flight.TakeOff
+            ? moment(CreateDate($scope.flight.TakeOff)).format('HHmm')
+            : moment(CreateDate($scope.flight.STD)).format('HHmm');
+        var start_time = $scope.flight.TakeOff ? $scope.flight.TakeOff : $scope.flight.STD;
+        if (type != 'main')
+        {
+            var trip_time = $scope.entity.root.time_trip;
+            start = moment(CreateDate(start_time).addMinutes(Number(trip_time))).format('HHmm');
+            
+                
+            //start = moment($scope.entity.root.ETA).format('HHmm');
+        }
+        //alert(moment($scope.entity.root.ETA).format('HHmm'));
+        // alert(start+'   '+route.length);
+        $.each(route, function (_i, _p) {
+            var upd_dto_rec = {
+                key: Number(_p.Id),
+                changes: {}
+            };
+            if (_i == 0) {
+                _p.ETA = start;
+            }
+            else {
+                var pre = route[_i - 1];
+                var pre_eta = pre.ATA ? pre.ATA : pre.ETA;
+
+                var _tn = _toNum(pre_eta.substr(0, 2)) * 60 + _toNum(pre_eta.substr(2, 2));
+
+                var dt = _toNum($scope._Time2(_p.ZoneTime).split(':')[0]) * 60 + _toNum($scope._Time2(_p.ZoneTime).split(':')[1]);
+
+                var eta = _tn + dt;
+
+                _p.ETA = time_convert(eta)
+
+            }
+            upd_dto_rec.changes.ETA = _p.ETA;
+            $scope.eta_upd_dto.push(upd_dto_rec);
+        });
+
+
+        if (refresh) {
+            $.each(route, function (_i, _p) {
+                $('#prop-nav-ETA_' + _p.Id).val(_p.ETA);
+
+            });
+        }
+
+        callback();
+
+       
+
+        // console.log(upd_dto);
+
+
+    };
+    $scope.set_ref_fuel = function(){
+
+        $scope.ref_fuel = $scope.entity.root.fuel_total_actual;
+        if (!$scope.ref_fuel)
+            $scope.ref_fuel = $scope.entity.root.fuel_total_corr;
+        if (!$scope.ref_fuel)
+            $scope.ref_fuel = $scope.entity.root.fuel_total;
+
+       // alert($scope.ref_fuel);
+        //$scope.ref_fuel = $scope.requested_fuel ? $scope.requested_fuel
+    };
+    $scope.corr_fuel_all = function (data) {
+        var trip =Number( data.root.fuel_trip_corr ? data.root.fuel_trip_corr: data.root.fuel_trip);
+        
+        var alt1 = Number(data.root.fuel_alt1_corr ? data.root.fuel_alt1_corr : data.root.fuel_alt);
+
+        var alt2 = Number(data.root.fuel_alt2_corr ? data.root.fuel_alt2_corr : data.root.fuel_alt2);
+
+        var hold = Number(data.root.fuel_hld_corr ? data.root.fuel_hld_corr : data.root.fuel_holding);
+
+        var res = 0;
+
+        var cont = Number(data.root.fuel_cont_corr ? data.root.fuel_cont_corr : data.root.fuel_contigency);
+
+        var taxi = Number(data.root.fuel_taxi_corr ? data.root.fuel_taxi_corr : data.root.fuel_taxiout);
+
+        var min_req = trip + alt1 + alt2 + hold + res + cont + taxi;
+        data.root.fuel_req_corr = min_req;
+       $scope. updateValue('prop-root-fuel_req_corr', min_req, null,null,true);
+        //propId, value, callback, prev,norecal
+
+        //prop-root-fuel_req_corr
+
+        var xtra = Number(data.root.fuel_xtra_corr ? data.root.fuel_xtra_corr : data.root.fuel_extra);
+
+        var add = Number(data.root.fuel_add_corr ? data.root.fuel_add_corr : data.root.fuel_additional);
+
+        var total = min_req + xtra + add;
+        data.root.fuel_total_corr = total;
+        $scope.set_ref_fuel();
+        $scope.recalculate_fuel(data, function () {
+            $scope.updateValue('prop-root-fuel_total_corr', total, null, null, false);
+
+        });
+       
+        //prop-root-fuel_total_corr
+
+    }
+    $scope.corr_fuel_req = function (data) {
+        var min_req = Number( data.root.fuel_req_corr ? data.root.fuel_req_corr : data.root.fuel_min_required);
+        var xtra = Number(data.root.fuel_xtra_corr ? data.root.fuel_xtra_corr : data.root.fuel_extra);
+
+        var add = Number(data.root.fuel_add_corr ? data.root.fuel_add_corr : data.root.fuel_additional);
+
+        var total = min_req + xtra + add;
+        $scope.set_ref_fuel();
+        $scope.recalculate_fuel(data, function () {
+            $scope.updateValue('prop-root-fuel_total_corr', total, null, null, false);
+
+        });
+       
+
+    }
+    $scope.calculate_wb = function (data) {
+
+        data.root.EstimatedZeroFuelWeight = Number(data.root.Payload) + Number(data.root.DryOperatingWeight);
+
+        data.root.EstimatedTaxiWeight = Number(data.root.EstimatedZeroFuelWeight) + Number(data.root.fuel_total);
+
+        data.root.EstimatedTakeoffWeight = Number(data.root.EstimatedTaxiWeight) - Number(data.root.fuel_taxiout);
+
+        data.root.EstimatedLandingWeight = Number(data.root.EstimatedTakeoffWeight) - Number(data.root.fuel_trip);
+
+        data.root.zfw_actual = Number(data.root.payload_actual ? data.root.payload_actual : data.root.Payload)
+            + Number(data.root.dow_actual ? data.root.dow_actual : data.root.DryOperatingWeight);
+
+        $scope. actual_fob = data.root.fuel_total_actual;
+        if (!data.root.fuel_total_actual)
+            $scope.actual_fob = data.root.fuel_total_corr ? data.root.fuel_total_corr : data.root.fuel_total;
+
+        $scope.actual_burn = data.root.fuel_used_actual;
+        //alert($scope.actual_burn);
+        if (!data.root.fuel_used_actual)
+            $scope. actual_burn = data.root.fuel_trip_corr ? data.root.fuel_trip_corr : data.root.fuel_trip;
+
+        
+        data.root.tow_actual = Number(data.root.zfw_actual) + Number($scope.actual_fob)
+            - Number(data.root.fuel_taxi_corr ? data.root.fuel_taxi_corr : data.root.fuel_taxiout);
+        data.root.txw_actual = Number(data.root.zfw_actual) + Number($scope.actual_fob);
+
+        data.root.lgw_actual = Number(data.root.tow_actual) - Number($scope.actual_burn);
+
+        return;
+        data.root.DOW = data.root.DryOperatingWeight ? Number(data.root.DryOperatingWeight) : 0;
+
+
+        var _payload = data.root.Payload;
+        if (data.root.payload_actual)
+            _payload = data.root.payload_actual;
+
+        var _zfw = data.root.EstimatedZeroFuelWeight;
+        if (data.root.zfw_actual)
+            _zfw = data.root.zfw_actual;
+
+       // var _tow=
+            //zfw_actual
+
+        data.root.PLYD = _payload ? Number(_payload) : 0;
+        data.root.EstimatedZeroFuelWeight = data.root.PLYD + data.root.DOW;
+
+        data.root.ZFW = data.root.EstimatedZeroFuelWeight ? Number(data.root.EstimatedZeroFuelWeight) : 0; //_zfw ? Number(_zfw) : 0; 
+
+
+        var _fuel_total = data.root.fuel_total; 
+        if (data.root.fuel_total_corr)
+            _fuel_total = data.root.fuel_total_corr; 
+        data.root.FOB = _fuel_total ? Number(_fuel_total) : 0;
+
+        data.root.TXWT = data.root.DOW + data.root.PLYD + data.root.FOB;
+
+
+        var _taxi = data.root.fuel_taxiout;
+        if (data.root.fuel_taxi_corr)
+            _taxi = data.root.fuel_taxi_corr;
+        data.root.TOW = data.root.TXWT - (_taxi ? Number(_taxi) : 0);
+
+        var _trip = data.root.fuel_trip;
+        if (data.root.fuel_trip_corr)
+            _trip = data.root.fuel_trip_corr;
+        data.root.BURN = _trip ? Number(_trip) : 0;
+
+        data.root.LGW = data.root.TOW - data.root.BURN;
+    };
     $scope.fill = function (data, callback) {
         //09-30
-        console.log('fill', data);
+        console.log('fill flight', $scope.flight);
+
+        $scope.requested_fuel = $scope.flight.FuelPlanned;
+
+
+        data.root.cargo = $scope.flight.Freight;
+        data.root.pax_adult = $scope.flight.PaxAdult;
+        data.root.pax_child = $scope.flight.PaxChild;
+        data.root.pax_infant = $scope.flight.PaxInfant;
+
+        data.root.fuel_total_actual = $scope.flight.FuelTotal;
+        data.root.fuel_used_actual = $scope.flight.BlockOn ? $scope.flight.FuelUsed : Number(data.root.fuel_trip_corr ? data.root.fuel_trip_corr : data.root.fuel_trip);
+        
+        data.root.fuel_remain_actual = $scope.flight.FuelTotal && $scope.flight.FuelUsed ? Number($scope.flight.FuelTotal) - Number($scope.flight.FuelUsed) : null;
+        data.root.fuel_saved_actual = $scope.flight.FuelTotal && $scope.flight.FuelUsed ? Number(data.root.fuel_trip) + Number(data.root.fuel_taxiout) - Number($scope.flight.FuelUsed) : null;
+
+
+        data.root.time_saved = $scope.flight.FlightTime ? Number(data.root.time_trip) - Number($scope.flight.FlightTime) : null;
+
+        //$scope.flight
+        $scope.init_data = data;
+
+        var first_main = Enumerable.From(data.routes).Where(function (x) { return x.NavType == "MAIN" }).FirstOrDefault();
+        first_main.FuelUsed = data.root.fuel_taxiout;
+
+        var first_alt1 = Enumerable.From(data.routes).Where(function (x) { return x.NavType == "ALT1" }).FirstOrDefault();
+        if (first_alt1) {
+            first_alt1.FuelUsed = data.root.fuel_trip + data.root.fuel_taxiout;
+        }
+
+        var first_alt2 = Enumerable.From(data.routes).Where(function (x) { return x.NavType == "ALT2" }).FirstOrDefault();
+        if (first_alt2) {
+            first_alt2.FuelUsed = data.root.fuel_trip + data.root.fuel_taxiout;
+        }
+
+
+        //$.each(data.routes, function (_i, _d) {
+        //    _d.DiffFuelRemained = null;
+        //    if (_d.FuelRemainedActual) {
+        //        _d.DiffFuelRemained  = Number(_d.FuelRemainedActual) - Number(_d.FuelRemained);
+        //    }
+
+        //});
+
 
 
         data.main_route = Enumerable.From(data.routes).Where(function (x) { return x.NavType == "MAIN" }).ToArray();
@@ -654,12 +1371,15 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
         data.alt2_wts = Enumerable.From(data.wts).Where(function (x) { return x.Type == "ALT2" }).ToArray();
 
 
+
+
+
         data.main_wts_grp = Enumerable.From(data.main_wts)
 
-            .GroupBy(function (item) {  return item.WayPoint ; }, null, (key, g) => {
+            .GroupBy(function (item) { return item.WayPoint; }, null, (key, g) => {
                 var _item = {
-                    
-                    WayPoint: key ,
+
+                    WayPoint: key,
 
                     items: Enumerable.From(g.source).Where(function (y) { return y.WindTemprature && y.FlightLevel; }).OrderBy(function (x) {
                         return x.FlightLevel;
@@ -668,7 +1388,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
 
                 };
-                
+
                 return _item;
             }).OrderBy(function (x) {
                 return 1;
@@ -717,30 +1437,107 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
             }).ToArray();
 
-        data.root.DOW = data.root.DryOperatingWeight ? Number(data.root.DryOperatingWeight) : 0;
-        data.root.PLYD = data.root.Payload ? Number(data.root.Payload) : 0;
-        data.root.ZFW = data.root.EstimatedZeroFuelWeight ? Number(data.root.EstimatedZeroFuelWeight) : 0;
-        data.root.FOB = data.root.fuel_total ? Number(data.root.fuel_total) : 0;
-        data.root.TXWT = data.root.DOW + data.root.PLYD + data.root.FOB;
-        data.root.TOW = data.root.TXWT - (data.root.fuel_taxiout ? Number(data.root.fuel_taxiout) : 0);
-        data.root.BURN = data.root.fuel_trip ? Number(data.root.fuel_trip) : 0;
-        data.root.LGW = data.root.TOW - data.root.BURN;
 
+        if (!data.root.fuel_total_corr && $scope.requested_fuel) {
+            data.root.fuel_total_corr = $scope.requested_fuel;
+            $scope.updateValue('prop-root-fuel_total_corr', data.root.fuel_total_corr, null, null, false);
+        }
 
         $scope.entity = data;
+        $scope.set_ref_fuel();
+
+
+
+        $scope.calculate_wb(data);
+
+
+
+
+        //data.root.fuel_trip_corr = str_to_num(data.root.fuel_trip_corr);
+        //alert(data.root.fuel_trip_corr);
+        //data.root.fuel_alt1_corr = str_to_num(data.root.fuel_alt1_corr);
+        //data.root.fuel_alt2_corr = str_to_num(data.root.fuel_alt2_corr);
+        //data.root.fuel_hld_corr = str_to_num(data.root.fuel_hld_corr);
+        //data.root.fuel_res_corr = str_to_num(data.root.fuel_res_corr);
+        //data.root.fuel_cont_corr = str_to_num(data.root.fuel_cont_corr);
+        //data.root.fuel_taxi_corr = str_to_num(data.root.fuel_taxi_corr);
+        //data.root.fuel_req_corr = str_to_num(data.root.fuel_req_corr);
+        //data.root.fuel_xtra_corr = str_to_num(data.root.fuel_xtra_corr);
+        //data.root.fuel_add_corr = str_to_num(data.root.fuel_add_corr);
+
+
+        
         $scope.entity.FlightId = data.flight_id;
         $scope.entity.Id = data.ofp_id;
-        $scope.entity.root.ETA = (new Date($scope.flight.STD)).addMinutes(data.root.time_trip);
-        
+        $scope.entity.root.ETA = new Date((new Date($scope.flight.STD)).addMinutes(data.root.time_trip));
+
+
+
+
+        //alert($scope.entity.root.ETA);
+
+
+
+
         setTimeout(function () {
-            callback();
+            $scope.eta_upd_dto = [];
+            // $('#prop-root-fuel_trip_corr').val(data.root.fuel_trip_corr);
+            $scope.fill_eta(data.main_route, 'main', function () {
+                $scope.fill_eta(data.alt1_route, 'alt', function () {
+                    $scope.fill_eta(data.alt2_route, 'alt', function () {
+
+                        flightService.updateOFPBBulk('OFPB_MainNavLog', $scope.eta_upd_dto).then(function (sdata) {
+                            $scope.eta_upd_dto = [];
+                            var keys_root = Object.keys(data.root);
+                            var exs = ['pax_adult', 'pax_child','pax_infant'];
+                            $.each(keys_root, function (_i, _k) {
+                                if (!exs.includes(_k)) {
+                                    $('#prop-root-' + _k).val(data.root[_k]);
+
+                                }
+                                else {
+
+                                }
+                               
+                            });
+
+
+                            $scope.recalculate_fuel(data, function () {
+                                var _sob = $scope.fillSOB();
+                                $scope.updateValue('prop-root-sob', _sob, null);
+                                callback();
+                            });
+
+                        });
+                        ////////////////////////
+                        
+                       
+
+
+                      
+
+
+
+
+                        
+
+
+
+                        /////////////////
+
+
+                    });
+
+                });
+            });
+
         }, 100);
 
 
 
-        
 
-       
+
+
 
 
         //      data.JPlan = data.JPlan ? JSON.parse(data.JPlan) : [];
@@ -936,7 +1733,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
     };
     //YYYY-MM-DD HH:mm
     $scope.toDateTime = function (dt) {
-        
+
         if (!dt)
             return "";
 
@@ -946,10 +1743,16 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
         return moment(new Date(dt)).format('YYYY-MM-DD HH:mm');
     };
-    $scope.int_to_time=function(num) {
+    $scope.int_to_time = function (num) {
+        if (!num)
+            return "";
+        var ch = "";
+        if (num < 0)
+            ch = "-";
+        num = Math.abs(num);
         var hours = Math.floor(num / 60);
         var minutes = num % 60;
-        return hours.toString().padStart(2, '0') +':'+ minutes.toString().padStart(2, '0');
+        return ch+ hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0');
     }
     function parseISOString(s) {
         s = s.toString();
@@ -978,7 +1781,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
         });
     };
     $scope.hold = function (key, index) {
-
+        return;
         var _id = 'prop_' + key + '_ata_' + index;
         var $elem = $('#' + _id);
         var dt = new Date();
@@ -1010,16 +1813,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
         //var prev = $(this).data('val');
         $scope.onBlur(_id, _val, null);
     };
-    $scope.nowClick2 = function (key) {
 
-        var _id = key;
-        var $elem = $('#' + _id);
-        var dt = new Date();
-        var _val = String(dt.getUTCHours()).padStart(2, '0') + String(dt.getUTCMinutes()).padStart(2, '0');
-        $elem.val(_val);
-        //var prev = $(this).data('val');
-        $scope.onBlur(_id, _val, null);
-    };
     $scope.dr = null;
     function isNumeric(str) {
         if (typeof str != "string") return false // we only process strings!  
@@ -1065,7 +1859,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
             flightService.epGetOFPByFlight_B($scope.entity.FlightId).then(function (response2) {
                 $scope.isEditable = (diff <= 24);
-                console.log('OFP_B_ROOT', response2);
+                //console.log('OFP_B_ROOT', response2);
                 if (response2.Data.root && response2.Data.root.JLSignedBy) {
                     // $scope.isEditable = false;
                     $scope.url_sign = signFiles + response2.Data.root.PICId + ".png";
@@ -1099,10 +1893,10 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
                     //07-23
                     $scope.fill(response2.Data, function () {
 
-                       // alert('version');
-                       // console.log('fill entity', $scope.entity);
+                        // alert('version');
+                        // console.log('fill entity', $scope.entity);
                         flightService.epCheckOFBVersion_B($scope.entity.FlightId, $scope.entity.Id).then(function (resCheck) {
-                           
+
                             if (resCheck.Data) {
                                 flightService.deleteOFP_B($scope.entity.FlightId, $scope.entity.Id, function () {
                                     alert("The OPF has been changed by Dispatchers. Please reopen the from to load new OFP.");
@@ -1150,7 +1944,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
                                 //        $.each($scope.props, function (_i, _d) {
 
-                                           
+
                                 //            if (_d.PropName == 'prop_fuel_extra' || _d.PropName == 'prop_fuel_ops.extra') {
                                 //                //$scope.plan_fuel_offblock
                                 //                if ($scope.fuel_total) {
@@ -1274,14 +2068,14 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
                                 //                updates.push({ OFPId: $scope.entity.Id, PropName: _d.PropName, User: $rootScope.userTitle, PropValue: toTime(CreateDate($scope.flight.BlockOn)) });
                                 //            }
 
-                                            
+
 
                                 //        });
 
 
                                 //        $scope.fillSOB();
 
-                                         
+
                                 //        $scope.fillETA();
 
                                 //        $scope.fillETAAlt1();
@@ -1291,7 +2085,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
                                 //        if ($scope.url_sign)
                                 //            $('#sig_pic_img').attr('src', $scope.url_sign);
-                                         
+
 
                                 //    }
                                 //    catch (e) {
@@ -1332,21 +2126,8 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
         }, function (err) { $scope.loadingVisible = false; General.ShowNotify(err.message, 'error'); });
     };
-    $scope.fillSOB = function () {
-        var _sob = ($scope.flight.PaxAdult ? $scope.flight.PaxAdult : 0)
-            + ($scope.flight.PaxChild ? $scope.flight.PaxChild : 0)
-            + ($scope.flight.PaxInfant ? $scope.flight.PaxInfant : 0);
-        var c1 = $('#prop_crew1').val();
-        var c2 = $('#prop_crew2').val();
-        var c3 = $('#prop_crew3').val();
-        _sob += (c1 ? _toNum(c1) : 0) + (c2 ? _toNum(c2) : 0) + (c3 ? _toNum(c3) : 0);
-        $('#prop_sob').val(_sob);
-    }
-    function time_convert(num) {
-        var hours = Math.floor(num / 60);
-        var minutes = num % 60;
-        return hours.toString().padStart(2, '0') + minutes.toString().padStart(2, '0');
-    }
+
+
     //2023
     $scope.fillETAAlt1 = function () {
         var loop = true;
@@ -1426,38 +2207,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
         });
 
     }
-    $scope.fillETA = function () {
-        if ($scope.flight.TakeOff) {
-            var tos = moment(CreateDate($scope.flight.TakeOff)).format('HHmm');
-            var to = _toNum(tos.substr(0, 2)) * 60 + _toNum(tos.substr(2, 2));
 
-            $.each($scope.entity.JPlan, function (_i, _d) {
-                var mm = _toNum(_d.TTM.split(':')[0]) * 60 + _toNum(_d.TTM.split(':')[1]);
-
-                if (_i == 0) {
-                    var n = mm + to;
-                    $('#prop_' + _d._key + '_eta_' + _i).val(time_convert(n));
-                    _d.eta = time_convert(n);
-                }
-                else {
-                    var pre = $scope.entity.JPlan[_i - 1];
-                    //var pre_eta = $('#prop_' + _d._key + '_eta_' + (_i - 1).toString()).val();
-                    var pre_eta = pre.eta;
-                    var pre_ata = $('#prop_' + pre._key + '_ata_' + (_i - 1).toString()).val();
-                    var _t = pre_ata ? pre_ata : pre_eta;
-
-                    var _tn = _toNum(_t.substr(0, 2)) * 60 + _toNum(_t.substr(2, 2));
-                    _tn += _toNum(_d.TME.split(':')[0]) * 60 + _toNum(_d.TME.split(':')[1]);
-                    $('#prop_' + _d._key + '_eta_' + _i).val(time_convert(_tn));
-                    _d.eta = time_convert(_tn);
-                }
-
-                //var _base = CreateDate($scope.flight.TakeOff);
-                //var _eta = new Date(_base.addMinutes(mm));
-                // $('#prop_' + _d._key + '_eta_' + _i).val(toTime(_eta));
-            });
-        }
-    }
     ////////////////////////////////
     $scope.scroll_dradd_height = $(window).height() - 100;
     var appWindow = angular.element($window);
