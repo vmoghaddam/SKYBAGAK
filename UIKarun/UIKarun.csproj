@@ -195,6 +195,7 @@
     <Content Include="app\views\refresh.html" />
     <Content Include="app\views\register0.html" />
     <Content Include="app\views\register1.html" />
+    <Content Include="app\views\report-efb.html" />
     <Content Include="app\views\reports.html" />
     <Content Include="app\views\reportViewer.html" />
     <Content Include="app\views\rptflightssimple.html" />

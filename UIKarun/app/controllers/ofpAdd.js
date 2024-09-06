@@ -514,9 +514,10 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
             + ($scope.entity.root.crew_cockpit ? Number($scope.entity.root.crew_cockpit) : 0)
             + ($scope.entity.root.crew_cabin ? Number($scope.entity.root.crew_cabin) : 0)
             + ($scope.entity.root.crew_fsg ? Number($scope.entity.root.crew_fsg) : 0)
-            + ($scope.entity.root.crew_fm ? Number($scope.entity.root.crew_fm) : 0)
-            + ($scope.entity.root.crew_dh ? Number($scope.entity.root.crew_dh) : 0);
-        
+            //+ ($scope.entity.root.crew_fm ? Number($scope.entity.root.crew_fm) : 0)
+            //+ ($scope.entity.root.crew_dh ? Number($scope.entity.root.crew_dh) : 0)
+            ;
+
         // alert(_sob);
 
         $('#prop-root-sob').val(_sob);
@@ -558,8 +559,8 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
                 break;
         }
     }
-    //08-11
-    $scope.updateValue = function (propId, value, callback, prev,norecal) {
+    //08-29
+    $scope.updateValue = function (propId, value, callback, prev, norecal) {
         //12-04
         if (propId.includes('undefined'))
             return;
@@ -570,9 +571,9 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
         var dto = { OFPId: $scope.entity.Id, PropName: propId, User: $rootScope.userTitle, FlightId: $scope.entity.FlightId };
 
 
-        
+
         if (propId.toLowerCase().includes('fuel') || propId.toLowerCase().includes('payload_actual')) {
-          
+
             value = correct_number(value);
             $('#' + propId).val(value);
         }
@@ -600,7 +601,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
         dto.PropValue = value;
         // $scope.loadingVisible = true;
 
-     //   console.log('prop_dto', dto);
+        //   console.log('prop_dto', dto);
 
         //flightService.saveOFPPropB(dto).then(function (response2) {
         flightService.updateOFPB(dto).then(function (response2) {
@@ -609,11 +610,11 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
                 $scope.corr_fuel_all($scope.entity);
             }
 
-            if (propId.toLowerCase().includes('fuel_req_corr')  && !norecal) {
+            if (propId.toLowerCase().includes('fuel_req_corr') && !norecal) {
                 $scope.corr_fuel_req($scope.entity);
             }
 
-            if (!norecal && propId.toLowerCase().includes('payload_actual') /*|| propId.toLowerCase().includes('_corr')*/   || propId.toLowerCase().includes('dow_actual')  ) {
+            if (!norecal && propId.toLowerCase().includes('payload_actual') /*|| propId.toLowerCase().includes('_corr')*/ || propId.toLowerCase().includes('dow_actual')) {
                 $scope.calculate_wb($scope.entity);
             }
 
@@ -621,7 +622,11 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
                 $scope.calculate_wb($scope.entity);
             }
             if (propId.toLowerCase().includes('fuel_total_corr') && !norecal) {
-               
+                $scope.set_ref_fuel();
+                $scope.recalculate_fuel($scope.entity, function () {
+                   
+
+                });
                 $scope.calculate_wb($scope.entity);
             }
 
@@ -648,10 +653,11 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
                         coll = $scope.entity.main_route;
                     if (rt.NavType == "ALT1") { coll = $scope.entity.alt1_route; type = "alt"; }
                     if (rt.NavType == "ALT2") { coll = $scope.entity.alt2_route; type = "alt"; }
-                    $scope.fill_eta(coll, type, function () {
-                        $scope.eta_upd_dto = [];
-                        $scope.save_eta();
-                    }, true);
+                    if ($scope.recal_eta)
+                        $scope.fill_eta(coll, type, function () {
+
+                            $scope.save_eta();
+                        }, true);
                 }
 
             }
@@ -687,7 +693,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
                         $('#' + _diff_used).val(_used_diff);
 
                     }
-                     
+
                     $scope.updateValue(_act_used, _used, null);
 
                 }
@@ -935,7 +941,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
     //08-12
     $scope.recalculate_fuel_diff = function (callback) {
         var points = ($scope.entity.main_route.concat($scope.entity.alt1_route)).concat($scope.entity.alt2_route);
-        
+
         $.each(points, function (_i, _p) {
             if (_p.FuelRemainedActual) {
                 _p.DiffFuelRemained = +_p.FuelRemainedActual - _p.FuelRemained2;
@@ -947,28 +953,34 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
                     changes: {
                         //DiffFuelRemained: _p.DiffFuelRemained,
                         FuelUsedActual: _p.FuelUsedActual,
-                        IsFuelUsedActual:true,
+                        IsFuelUsedActual: true,
 
                     }
                 };
                 $scope.navlog_upd_dto.push(upd_dto_rec);
 
             }
-           
-            
+
+
         });
 
 
         callback();
     }
     $scope.fill_route_fuel = function (route, type, callback, refresh) {
+      
         var first_fuel = Number($scope.ref_fuel);
         var diff_used = 0;
         if (type == "main") {
-            var taxi = Number($scope.entity.root.fuel_taxi_corr ? $scope.entity.root.fuel_taxi_corr : $scope.entity.root.fuel_taxiout);
+            var taxi = Number(  $scope.entity.root.fuel_taxiout);
             diff_used = taxi - Number($scope.entity.root.fuel_taxiout);
             first_fuel = first_fuel - taxi;
+
+           // diff_used = 0;
+           // first_fuel = first_fuel - 0;
             route[0].FuelUsed2 = Number(route[0].FuelUsed) + diff_used;
+            route[0].CumulativeFuel2 = Number(route[0].CumulativeFuel) + diff_used;
+
         }
         if (type == "alt") {
             var taxi = Number($scope.entity.root.fuel_taxi_corr ? $scope.entity.root.fuel_taxi_corr : $scope.entity.root.fuel_taxiout);
@@ -977,6 +989,59 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
             first_fuel = Number($scope.ref_fuel) - trip - taxi;
             route[0].FuelUsed2 = trip + taxi;
+            route[0].CumulativeFuel2 = trip + taxi;
+
+
+
+
+        }
+        var diff = first_fuel - route[0].FuelRemained;
+
+
+        $.each(route, function (_i, _p) {
+
+
+            _p.FuelRemained2 = Number(_p.FuelRemained) + diff;
+            if (_i > 0) {
+                _p.FuelUsed2 = _p.FuelUsed;
+                _p.CumulativeFuel2 = _p.CumulativeFuel;
+            }
+
+            var upd_dto_rec = {
+                key: Number(_p.Id),
+                changes: {
+                    FuelUsed2: _p.FuelUsed,
+                    CumulativeFuel2: _p.CumulativeFuel2,
+                    FuelRemained2: _p.FuelRemained2,
+                    IsFuelUsed2: true,
+                    IsFuelRemained2: true,
+                    IsCumulativeFuel2: true,
+
+                }
+            };
+            $scope.navlog_upd_dto.push(upd_dto_rec);
+
+        });
+        callback();
+        return;
+        var first_fuel = Number($scope.ref_fuel);
+        var diff_used = 0;
+        if (type == "main") {
+            var taxi = Number($scope.entity.root.fuel_taxi_corr ? $scope.entity.root.fuel_taxi_corr : $scope.entity.root.fuel_taxiout);
+            diff_used = taxi - Number($scope.entity.root.fuel_taxiout);
+            first_fuel = first_fuel - taxi;
+            route[0].FuelUsed2 = Number(route[0].FuelUsed) + diff_used;
+            route[0].CumulativeFuel2 = Number(route[0].CumulativeFuel) + diff_used;
+            
+        }
+        if (type == "alt") {
+            var taxi = Number($scope.entity.root.fuel_taxi_corr ? $scope.entity.root.fuel_taxi_corr : $scope.entity.root.fuel_taxiout);
+            var trip = Number($scope.entity.root.fuel_trip_corr ? $scope.entity.root.fuel_trip_corr : $scope.entity.root.fuel_trip);
+
+
+            first_fuel = Number($scope.ref_fuel) - trip - taxi;
+            route[0].FuelUsed2 = trip + taxi;
+            route[0].CumulativeFuel2 = trip + taxi;
 
 
 
@@ -988,26 +1053,20 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
 
             _p.FuelRemained2 = Number(_p.FuelRemained) + diff;
-            if (_i > 0)
+            if (_i > 0) {
                 _p.FuelUsed2 = _p.FuelUsed;
-            //if (_p.FuelRemainedActual) {
-
-            //    var _rem = Number(_p.FuelRemainedActual) - Number(_p.FuelRemained);
-            //    _p.DiffFuelRemained = _rem;
-
-            //    var _used = Number(_p.FuelUsed) - _rem;
-            //    _p.FuelUsedActual = _used;
-
-
-
-            //}
+                _p.CumulativeFuel2 = _p.CumulativeFuel;
+            }
+           
             var upd_dto_rec = {
                 key: Number(_p.Id),
                 changes: {
                     FuelUsed2: _p.FuelUsed,
+                    CumulativeFuel2: _p.CumulativeFuel2,
                     FuelRemained2: _p.FuelRemained2,
                     IsFuelUsed2: true,
-                    IsFuelRemained2:true,
+                    IsFuelRemained2: true,
+                    IsCumulativeFuel2:true,
 
                 }
             };
@@ -1030,7 +1089,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
                 $scope.recalculate_fuel_diff(function () {
 
-                    flightService.updateOFPB_Nav_Fuel_Bulk('OFPB_MainNavLog', $scope.navlog_upd_dto).then(function (sdata) {
+                  //  flightService.updateOFPB_Nav_Fuel_Bulk('OFPB_MainNavLog', $scope.navlog_upd_dto).then(function (sdata) {
                         $.each(data.main_route, function (_i, _w) {
                             $('#prop-nav-ETA_' + _w.Id).val(_w.ETA);
                             $('#prop-nav-ATA_' + _w.Id).val(_w.ATA);
@@ -1090,13 +1149,13 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
                             callback();
 
 
-                         
-                    });
 
-                    
+                  //  });
+
+
 
                 });
-                
+
 
 
             });
@@ -1114,26 +1173,26 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
     $scope.save_eta = function () {
 
         flightService.updateOFPBBulk('OFPB_MainNavLog', $scope.eta_upd_dto).then(function (sdata) {
-             
+
             $scope.eta_upd_dto = [];
         });
     }
-   
+
 
     $scope.eta_upd_dto = [];
+    $scope.recal_eta = false;
     $scope.fill_eta = function (route, type, callback, refresh) {
-       
+
         var c = 0;
         var start = $scope.flight.TakeOff
             ? moment(CreateDate($scope.flight.TakeOff)).format('HHmm')
             : moment(CreateDate($scope.flight.STD)).format('HHmm');
         var start_time = $scope.flight.TakeOff ? $scope.flight.TakeOff : $scope.flight.STD;
-        if (type != 'main')
-        {
+        if (type != 'main') {
             var trip_time = $scope.entity.root.time_trip;
             start = moment(CreateDate(start_time).addMinutes(Number(trip_time))).format('HHmm');
-            
-                
+
+
             //start = moment($scope.entity.root.ETA).format('HHmm');
         }
         //alert(moment($scope.entity.root.ETA).format('HHmm'));
@@ -1148,7 +1207,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
             }
             else {
                 var pre = route[_i - 1];
-                var pre_eta = pre.ATA ? pre.ATA : pre.ETA;
+                var pre_eta = $scope.recal_eta ? (pre.ATA ? pre.ATA : pre.ETA) : pre.ETA;
 
                 var _tn = _toNum(pre_eta.substr(0, 2)) * 60 + _toNum(pre_eta.substr(2, 2));
 
@@ -1170,29 +1229,37 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
             });
         }
-
+       
+       
         callback();
 
-       
+
 
         // console.log(upd_dto);
 
 
     };
-    $scope.set_ref_fuel = function(){
-
-        $scope.ref_fuel = $scope.entity.root.fuel_total_actual;
-        if (!$scope.ref_fuel)
-            $scope.ref_fuel = $scope.entity.root.fuel_total_corr;
+    $scope.set_ref_fuel = function () {
+        $scope.ref_fuel = $scope.entity.root.fuel_total_corr;
         if (!$scope.ref_fuel)
             $scope.ref_fuel = $scope.entity.root.fuel_total;
 
+
+       // $scope.ref_fuel = $scope.entity.root.fuel_total_actual;
+       // if (!$scope.ref_fuel)
+       //     $scope.ref_fuel = $scope.entity.root.fuel_total_corr;
+       // if (!$scope.ref_fuel)
+       //     $scope.ref_fuel = $scope.entity.root.fuel_total;
+
+
        // alert($scope.ref_fuel);
+
+        // alert($scope.ref_fuel);
         //$scope.ref_fuel = $scope.requested_fuel ? $scope.requested_fuel
     };
     $scope.corr_fuel_all = function (data) {
-        var trip =Number( data.root.fuel_trip_corr ? data.root.fuel_trip_corr: data.root.fuel_trip);
-        
+        var trip = Number(data.root.fuel_trip_corr ? data.root.fuel_trip_corr : data.root.fuel_trip);
+
         var alt1 = Number(data.root.fuel_alt1_corr ? data.root.fuel_alt1_corr : data.root.fuel_alt);
 
         var alt2 = Number(data.root.fuel_alt2_corr ? data.root.fuel_alt2_corr : data.root.fuel_alt2);
@@ -1207,7 +1274,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
         var min_req = trip + alt1 + alt2 + hold + res + cont + taxi;
         data.root.fuel_req_corr = min_req;
-       $scope. updateValue('prop-root-fuel_req_corr', min_req, null,null,true);
+        $scope.updateValue('prop-root-fuel_req_corr', min_req, null, null, true);
         //propId, value, callback, prev,norecal
 
         //prop-root-fuel_req_corr
@@ -1223,12 +1290,12 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
             $scope.updateValue('prop-root-fuel_total_corr', total, null, null, false);
 
         });
-       
+
         //prop-root-fuel_total_corr
 
     }
     $scope.corr_fuel_req = function (data) {
-        var min_req = Number( data.root.fuel_req_corr ? data.root.fuel_req_corr : data.root.fuel_min_required);
+        var min_req = Number(data.root.fuel_req_corr ? data.root.fuel_req_corr : data.root.fuel_min_required);
         var xtra = Number(data.root.fuel_xtra_corr ? data.root.fuel_xtra_corr : data.root.fuel_extra);
 
         var add = Number(data.root.fuel_add_corr ? data.root.fuel_add_corr : data.root.fuel_additional);
@@ -1239,7 +1306,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
             $scope.updateValue('prop-root-fuel_total_corr', total, null, null, false);
 
         });
-       
+
 
     }
     $scope.calculate_wb = function (data) {
@@ -1255,16 +1322,16 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
         data.root.zfw_actual = Number(data.root.payload_actual ? data.root.payload_actual : data.root.Payload)
             + Number(data.root.dow_actual ? data.root.dow_actual : data.root.DryOperatingWeight);
 
-        $scope. actual_fob = data.root.fuel_total_actual;
+        $scope.actual_fob = data.root.fuel_total_actual;
         if (!data.root.fuel_total_actual)
             $scope.actual_fob = data.root.fuel_total_corr ? data.root.fuel_total_corr : data.root.fuel_total;
 
         $scope.actual_burn = data.root.fuel_used_actual;
         //alert($scope.actual_burn);
         if (!data.root.fuel_used_actual)
-            $scope. actual_burn = data.root.fuel_trip_corr ? data.root.fuel_trip_corr : data.root.fuel_trip;
+            $scope.actual_burn = data.root.fuel_trip_corr ? data.root.fuel_trip_corr : data.root.fuel_trip;
 
-        
+
         data.root.tow_actual = Number(data.root.zfw_actual) + Number($scope.actual_fob)
             - Number(data.root.fuel_taxi_corr ? data.root.fuel_taxi_corr : data.root.fuel_taxiout);
         data.root.txw_actual = Number(data.root.zfw_actual) + Number($scope.actual_fob);
@@ -1283,8 +1350,8 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
         if (data.root.zfw_actual)
             _zfw = data.root.zfw_actual;
 
-       // var _tow=
-            //zfw_actual
+        // var _tow=
+        //zfw_actual
 
         data.root.PLYD = _payload ? Number(_payload) : 0;
         data.root.EstimatedZeroFuelWeight = data.root.PLYD + data.root.DOW;
@@ -1292,9 +1359,9 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
         data.root.ZFW = data.root.EstimatedZeroFuelWeight ? Number(data.root.EstimatedZeroFuelWeight) : 0; //_zfw ? Number(_zfw) : 0; 
 
 
-        var _fuel_total = data.root.fuel_total; 
+        var _fuel_total = data.root.fuel_total;
         if (data.root.fuel_total_corr)
-            _fuel_total = data.root.fuel_total_corr; 
+            _fuel_total = data.root.fuel_total_corr;
         data.root.FOB = _fuel_total ? Number(_fuel_total) : 0;
 
         data.root.TXWT = data.root.DOW + data.root.PLYD + data.root.FOB;
@@ -1312,9 +1379,157 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
         data.root.LGW = data.root.TOW - data.root.BURN;
     };
+    $scope.get_ldg_remaining_fuel = function () {
+        //approcah1
+        //var sum = Enumerable.From($scope.entity.main_route).Select(function (x) { return x.FuelUsedActual ? Number(x.FuelUsedActual) : Number(x.FuelUsed2); }).Sum('$');
+        
+       // return $scope.get_off_remaining_fuel() - sum;
+
+        //approach2
+        if (!$scope.entity || !$scope.entity.main_route)
+            return null;
+        var idx = $scope.entity.main_route.length - 1;
+        if ($scope.entity.main_route[idx].FuelRemainedActual)
+            return $scope.entity.main_route[idx].FuelRemainedActual - $scope.entity.root.ManeuveringFuel;
+        //return $scope.entity.main_route[idx].FuelRemained2;
+        return null;
+    };
+
+    $scope.get_ldg_remaining_fuel_final = function () {
+        //approcah1
+        //var sum = Enumerable.From($scope.entity.main_route).Select(function (x) { return x.FuelUsedActual ? Number(x.FuelUsedActual) : Number(x.FuelUsed2); }).Sum('$');
+
+        // return $scope.get_off_remaining_fuel() - sum;
+
+        //approach2
+        if (!$scope.entity || !$scope.entity.main_route)
+            return null;
+        var idx = $scope.entity.main_route.length - 1;
+        if ($scope.entity.main_route[idx].FuelRemainedActual)
+            return $scope.entity.main_route[idx].FuelRemainedActual - $scope.entity.root.ManeuveringFuel;
+        //return $scope.entity.main_route[idx].FuelRemained2 - $scope.entity.root.ManeuveringFuel;
+        return null;
+    };
+
+
+    $scope.get_to_remaining_fuel = function () {
+        if (!$scope.entity || !$scope.entity.main_route)
+            return null;
+        if ($scope.entity.main_route[0].FuelRemainedActual)
+            return $scope.entity.main_route[0].FuelRemainedActual;
+       // return $scope.entity.main_route[0].FuelRemained2
+        return null;
+    };
+    $scope.get_off_remaining_fuel = function () {
+       // if ($scope.entity.root.fuel_total_actual)
+       //     return $scope.entity.root.fuel_total_actual;
+        if (!$scope.entity || !$scope.entity.root)
+            return null;
+        if ($scope.entity.root.fuel_total_corr)
+            return $scope.entity.root.fuel_total_corr;
+        return $scope.entity.root.fuel_total
+       
+    };
+    $scope.get_on_remaining_fuel = function () {
+        if (!$scope.entity || !$scope.entity.root)
+            return null;
+        return $scope.entity.root.fuel_remain_actual ;
+
+    };
+    $scope.get_final_arr = function () {
+        if (!$scope.entity || !$scope.entity.root || !$scope.entity.main_route)
+            return null;
+        var last_point = $scope.entity.main_route[$scope.entity.main_route.length - 1];
+        if (!last_point)
+            return null;
+        if (last_point.ATA) {
+            var _arr = _toNum(last_point.ATA.toString().substr(0, 2)) * 60 + _toNum(last_point.ATA.toString().substr(2, 2)) + Number($scope.entity.ManeuveringTime);
+            return $scope.int_to_time( _arr);
+        }
+        else {
+            if (!last_point.ETA)
+                return null;
+           // console.log('last point', last_point.ETA);
+            var _arr = _toNum(last_point.ETA.toString().substr(0, 2)) * 60 + _toNum(last_point.ETA.toString().substr(2, 2)) + Number($scope.entity.root.ManeuveringTime);
+            return $scope.int_to_time(_arr);
+
+        }
+    };
+
+    $scope.get_flight_used_fuel = function () {
+        if ($scope.get_to_remaining_fuel() && $scope.get_ldg_remaining_fuel())
+            return $scope.get_to_remaining_fuel() - $scope.get_ldg_remaining_fuel();
+        return null;
+        //return $scope.get_to_remaining_fuel() - $scope.get_ldg_remaining_fuel();
+    };
+    $scope.get_block_used_fuel = function () {
+        if ($scope.get_off_remaining_fuel() && $scope.get_on_remaining_fuel())
+            return $scope.get_off_remaining_fuel() - $scope.get_on_remaining_fuel();
+        return null;
+        //return $scope.get_on_remaining_fuel() - $scope.get_off_remaining_fuel();
+    };
+
+
+    $scope.get_flight_used_fuel_pln = function () {
+        return $scope.entity.root.fuel_total - $scope.entity.root.fuel_taxiout - get_ldg_remaining_fuel();
+    };
+    $scope.get_block_used_fuel_pln = function () {
+
+        return $scope.entity.root.fuel_total - $scope.get_ldg_remaining_fuel_final();
+    };
+
+    //pilot_click('Pilot1','pf')
+    $scope.pilot_click = function (pilot,pfpm) {
+        if (pilot == 'Pilot1') {
+            $scope.entity.root.Pilot1_FPFM = pfpm;
+            if (pfpm == 'pf')
+                $scope.entity.root.Pilot2_FPFM = 'pm';
+            else
+                $scope.entity.root.Pilot2_FPFM = 'pf';
+
+        }
+        if (pilot == 'Pilot2') {
+            $scope.entity.root.Pilot2_FPFM = pfpm;
+            if (pfpm == 'pf')
+                $scope.entity.root.Pilot1_FPFM = 'pm';
+            else
+                $scope.entity.root.Pilot1_FPFM = 'pf';
+
+        }
+        var dto1 = { OFPId: $scope.entity.Id, PropName: 'prop-root-Pilot1_FPFM', User: $rootScope.userTitle, FlightId: $scope.entity.FlightId, PropValue: $scope.entity.root.Pilot1_FPFM};
+        flightService.updateOFPB(dto1).then(function (res1) {
+            var dto2 = { OFPId: $scope.entity.Id, PropName: 'prop-root-Pilot2_FPFM', User: $rootScope.userTitle, FlightId: $scope.entity.FlightId, PropValue: $scope.entity.root.Pilot2_FPFM };
+            flightService.updateOFPB(dto2);
+        }, function (err) {
+
+            $scope.loadingVisible = false; General.ShowNotify(JSON.stringify(err), 'error');
+        });
+        //alert($scope.entity.root.Pilot1_FPFM);
+        //alert($scope.entity.root.Pilot2_FPFM);
+
+    }
+    $scope.getMinutesDiff = function (first, second) {
+        if (!first || !second)
+            return null;
+        var diff = Math.abs(new Date(second) - new Date(first));
+        var minutes = Math.floor((diff / 1000) / 60);
+        return minutes;
+    };
+    $scope.get_pilot_class = function (pilot, pfpm) {
+        if (!$scope.entity || !$scope.entity.root)
+            return;
+        
+        if ($scope.entity.root[pilot] == pfpm)
+            return 'selectd_pfpm';
+        else
+            return '';
+
+    }  //('Pilot2', 'pf')
+
+    
     $scope.fill = function (data, callback) {
         //09-30
-        console.log('fill flight', $scope.flight);
+      //  console.log('fill flight', $scope.flight);
 
         $scope.requested_fuel = $scope.flight.FuelPlanned;
 
@@ -1326,7 +1541,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
         data.root.fuel_total_actual = $scope.flight.FuelTotal;
         data.root.fuel_used_actual = $scope.flight.BlockOn ? $scope.flight.FuelUsed : Number(data.root.fuel_trip_corr ? data.root.fuel_trip_corr : data.root.fuel_trip);
-        
+
         data.root.fuel_remain_actual = $scope.flight.FuelTotal && $scope.flight.FuelUsed ? Number($scope.flight.FuelTotal) - Number($scope.flight.FuelUsed) : null;
         data.root.fuel_saved_actual = $scope.flight.FuelTotal && $scope.flight.FuelUsed ? Number(data.root.fuel_trip) + Number(data.root.fuel_taxiout) - Number($scope.flight.FuelUsed) : null;
 
@@ -1338,15 +1553,19 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
         var first_main = Enumerable.From(data.routes).Where(function (x) { return x.NavType == "MAIN" }).FirstOrDefault();
         first_main.FuelUsed = data.root.fuel_taxiout;
+        first_main.CumulativeFuel = first_main.FuelUsed;
 
         var first_alt1 = Enumerable.From(data.routes).Where(function (x) { return x.NavType == "ALT1" }).FirstOrDefault();
         if (first_alt1) {
             first_alt1.FuelUsed = data.root.fuel_trip + data.root.fuel_taxiout;
+            first_alt1.CumulativeFuel = first_alt1.FuelUsed;
+
         }
 
         var first_alt2 = Enumerable.From(data.routes).Where(function (x) { return x.NavType == "ALT2" }).FirstOrDefault();
         if (first_alt2) {
             first_alt2.FuelUsed = data.root.fuel_trip + data.root.fuel_taxiout;
+            first_alt2.CumulativeFuel = first_alt2.FuelUsed;
         }
 
 
@@ -1466,7 +1685,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
         //data.root.fuel_add_corr = str_to_num(data.root.fuel_add_corr);
 
 
-        
+
         $scope.entity.FlightId = data.flight_id;
         $scope.entity.Id = data.ofp_id;
         $scope.entity.root.ETA = new Date((new Date($scope.flight.STD)).addMinutes(data.root.time_trip));
@@ -1486,10 +1705,10 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
                 $scope.fill_eta(data.alt1_route, 'alt', function () {
                     $scope.fill_eta(data.alt2_route, 'alt', function () {
 
-                        flightService.updateOFPBBulk('OFPB_MainNavLog', $scope.eta_upd_dto).then(function (sdata) {
+                       // flightService.updateOFPBBulk('OFPB_MainNavLog', $scope.eta_upd_dto).then(function (sdata) {
                             $scope.eta_upd_dto = [];
                             var keys_root = Object.keys(data.root);
-                            var exs = ['pax_adult', 'pax_child','pax_infant'];
+                            var exs = ['pax_adult', 'pax_child', 'pax_infant'];
                             $.each(keys_root, function (_i, _k) {
                                 if (!exs.includes(_k)) {
                                     $('#prop-root-' + _k).val(data.root[_k]);
@@ -1498,7 +1717,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
                                 else {
 
                                 }
-                               
+
                             });
 
 
@@ -1508,18 +1727,18 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
                                 callback();
                             });
 
-                        });
+                   //     });
                         ////////////////////////
-                        
-                       
-
-
-                      
 
 
 
 
-                        
+
+
+
+
+
+
 
 
 
@@ -1752,7 +1971,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
         num = Math.abs(num);
         var hours = Math.floor(num / 60);
         var minutes = num % 60;
-        return ch+ hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0');
+        return ch + hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0');
     }
     function parseISOString(s) {
         s = s.toString();

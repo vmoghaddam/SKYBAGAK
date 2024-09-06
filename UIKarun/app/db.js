@@ -6,7 +6,7 @@ db.getDb = function () {
     return _db;
 };
 db.Init = function () {
-    _db.version(358).stores({
+    _db.version(370).stores({
         AppCrewFlights: "Id,FlightId,CrewId,FDPId,FDPItemId,DutyType,IsPositioning,PositionId,Position,FlightNumber,STDDay,FlightStatusId,Register,RegisterId,FromAirportIATA,ToAirportIATA,STD,STA,BlockOff,BlockOn,TakeOff,Landing,IStart,IsSynced",
         FlightCrews: "[CrewId+FlightId],FDPItemId,FDPId",
         Calendar: "[Id+Date],DateStart,Legs,Sectors,DutyType,DutyTypeTitle,Year,Month,Day",
@@ -44,6 +44,7 @@ db.Init = function () {
         OFPB_MainNavLog: "Id,RootId,IsSynced",
         OFPB_WindTemperature: "Id,OFPId,IsSynced",
         OFPB_Prop: "OFPId,PropName,IsSynced",
+        OFPB_PropRoot: "PropName,OFPId,IsSynced",
 
 
     });

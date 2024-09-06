@@ -170,6 +170,15 @@ namespace APCore.Services
 
 
                 var employee = await _context.ViewEmployees.FirstOrDefaultAsync(q => q.UserId == user.Id);
+                List<string> jobgroups = new List<string>() {"TRE","TRI","P1","P2" };
+                if (jobgroups.IndexOf(employee.JobGroup) == -1) {
+                    return new UserManagerResponse
+                    {
+                        access_token = "Invalid access",
+                        IsSuccess = false,
+                    };
+                }
+
                 var userDate = employee.Id.ToString() + "*" + employee.PersonId.ToString() + "*" + employee.Name + "*" + employee.JobGroup + "*" + employee.JobGroupCode;
 
                 var claims = new[]

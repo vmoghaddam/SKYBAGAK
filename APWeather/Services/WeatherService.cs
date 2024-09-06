@@ -1924,19 +1924,23 @@ namespace APWeather.Services
 
         public async Task<DataResponse> GetAirportNotamAll()
         {
-            var stations = await _context.Airport.Where(q => q.ICAO.StartsWith("OI") || q.ICAO.StartsWith("OR")
+            var stations = await _context.Airport.Where(q => q.ICAO.StartsWith("OI")
+            || q.ICAO.StartsWith("OR")
              || q.ICAO.StartsWith("UT")
              || q.ICAO.StartsWith("UG")
               || q.ICAO.StartsWith("OK")
                || q.ICAO.StartsWith("LT")
                || q.ICAO.StartsWith("UDYZ")
+               || q.ICAO.StartsWith("OO")
             ).Select(q => q.ICAO).ToListAsync();
-            //  stations = new List<string>() { "OIZH" };
+            
+            //stations = new List<string>() { "OIII" };
             stations.Add("OIIX");
             DateTime baseDate = DateTime.Now.Date;
+            DateTime baseDate2 = baseDate.AddDays(1);
             var data = new List<NOTAM>();
-            var exists = await _context.NOTAM.Where(q => stations.Contains(q.StationId) && q.DateDay == baseDate).ToListAsync();
-            _context.NOTAM.RemoveRange(exists);
+             var exists = await _context.NOTAM.Where(q => stations.Contains(q.StationId) && (q.DateDay == baseDate || q.DateDay == baseDate2)).ToListAsync();
+           // _context.NOTAM.RemoveRange(exists);
             foreach (var apt in stations)
             {
                 try
@@ -1964,9 +1968,20 @@ namespace APWeather.Services
                             result.Add(Regex.Replace(x, @"\r\n?|\n", "<br/>"));
 
                         //data.Add(new NotamResult() { ICAO = apt, NOTAMS = result });
+                        var exist_station = exists.Where(q => q.StationId == apt).ToList();
+                        _context.NOTAM.RemoveRange(exist_station);
                         var notam = new NOTAM()
                         {
                             DateDay = baseDate,
+                            DateCreate = DateTime.Now,
+                            FDPId = null,
+                            FlightId = null,
+                            StationId = apt,
+
+                        };
+                        var notam2 = new NOTAM()
+                        {
+                            DateDay = baseDate2,
                             DateCreate = DateTime.Now,
                             FDPId = null,
                             FlightId = null,
@@ -1977,8 +1992,15 @@ namespace APWeather.Services
                         {
                             Text = q,
                         }).ToList();
+                        notam2.NOTAMItem = result.Select(q => new NOTAMItem()
+                        {
+                            Text = q,
+                        }).ToList();
                         _context.NOTAM.Add(notam);
                         data.Add(notam);
+
+                        _context.NOTAM.Add(notam2);
+                        data.Add(notam2);
 
                     }
                 }
@@ -1988,7 +2010,7 @@ namespace APWeather.Services
                 }
             }
             var saveresult = await _context.SaveAsync();
-            return new DataResponse
+           return new DataResponse
             {
                 Data = data.Count,
                 Errors = null,

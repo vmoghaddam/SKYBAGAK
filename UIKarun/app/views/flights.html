@@ -253,6 +253,30 @@
                 width: 100%;
                 height: 100%;
             }
+
+    #flightScheduleChart {
+        width: 100%;
+        height: 300px;
+    }
+
+    .info {
+        text-align: center;
+        margin-top: 20px;
+        font-family: Arial, sans-serif;
+    }
+
+        .info h2 {
+            margin-bottom: 10px;
+        }
+
+        .info p {
+            margin: 5px 0;
+        }
+
+    #chart-container {
+        width: 100%;
+        height: 300px;
+    }
 </style>
 
 <div style="height:100%;">
@@ -586,6 +610,20 @@
                 </div>
                 <div class="col-lg-7 col-md-7 col-sm-7 col-xs-6 padding-0">
                     <div id="rightColumn" dx-scroll-view="scroll_right" style="padding:7px;padding-top:5px;">
+                        <!--charts-->
+                        <div>
+                            <div class="info">
+                                <h2>Flight Schedule</h2>
+                                <p>UUDD - Moscow/Domodedovo</p>
+                                <p>STD: 08:10 | ETD: 08:30</p>
+                                <p>Block Fuel: 14336 KG | FL: 60</p>
+                                <p>UDYZ - Yerevan/Zvartnots Intl</p>
+                                <p>ETA: 12:43 | STA: 11:55</p>
+                            </div>
+
+                            <div id="chart-container"></div>
+                        </div>
+                        <!--end of charts-->
                         <div ng-show="[1165].indexOf(selectedFlight.DutyType)==-1">
                             <div style="padding:7px;border-bottom:1px solid #eee;text-transform: uppercase;font-size:17px" class="section-header">{{selectedFlight.DutyTypeTitle}}</div>
                             <div style="padding: 7px;padding-top:10px">
@@ -612,6 +650,7 @@
 
 
                         <div ng-show="selectedFlight.DutyType==1165">
+
                             <div style="padding:7px;border-bottom:1px solid #eee" class="section-header">Duty</div>
                             <div style="padding:0px;" class="main-bkcolor2-light-imp">
 
@@ -656,13 +695,13 @@
                                         </td>
                                     </tr>
                                     <!--<tr>
-                                        <td style="width:150px;color:#eee">
-                                            To
-                                        </td>
-                                        <td>
-                                            <span style="display:inline-block">{{selectedFlight.ToAirportIATA}}</span>
-                                        </td>
-                                    </tr>-->
+                    <td style="width:150px;color:#eee">
+                        To
+                    </td>
+                    <td>
+                        <span style="display:inline-block">{{selectedFlight.ToAirportIATA}}</span>
+                    </td>
+                </tr>-->
                                     <tr>
                                         <td>
                                             STD
@@ -687,14 +726,14 @@
                                     </tr>
 
                                     <!--<tr>
-                                        <td style="width:150px; ">
-                                            STA
-                                        </td>
-                                        <td>
-                                            <span style="display:inline-block">{{getSTA(selectedFlight)}}</span>
-                                            <span style="display:inline-block;margin-left:3px;">({{getSTALocal(selectedFlight)}})</span>
-                                        </td>
-                                    </tr>-->
+                    <td style="width:150px; ">
+                        STA
+                    </td>
+                    <td>
+                        <span style="display:inline-block">{{getSTA(selectedFlight)}}</span>
+                        <span style="display:inline-block;margin-left:3px;">({{getSTALocal(selectedFlight)}})</span>
+                    </td>
+                </tr>-->
                                     <tr>
                                         <td colspan="2">
                                             OffBlock
@@ -706,7 +745,7 @@
                                     </tr>
                                     <tr>
                                         <td colspan="2">
-                                            
+
                                             T/O
                                         </td>
                                         <td colspan="2">
@@ -719,7 +758,7 @@
                                             LND
                                         </td>
                                         <td colspan="2">
-                                            <span ng-show="showMVTTime(selectedFlight)" style="display:inline-block" >{{getLanding(selectedFlight,1)}}</span>
+                                            <span ng-show="showMVTTime(selectedFlight)" style="display:inline-block">{{getLanding(selectedFlight,1)}}</span>
                                             <!-- <span ng-show="showMVTTime(selectedFlight)" style="display:inline-block;margin-left:3px;">({{getLandingLocal(selectedFlight,1)}})</span>-->
                                         </td>
                                     </tr>
@@ -742,7 +781,7 @@
                                         </td>
                                     </tr>
                                 </table>
-                              
+
                             </div>
                             <div style="padding:7px;border-bottom:1px solid #eee" class="section-header">Time</div>
                             <div style="padding:0px;" class="main-bkcolor2-light-imp">
@@ -752,9 +791,10 @@
                                             Block Time
                                         </td>
                                         <td style="border-right: 1px dotted #bbb">
-                                            <span style="display:inline-block">{{getDuration(selectedFlight.BlockTime)}}
+                                            <span style="display:inline-block">
+                                                {{getDuration(selectedFlight.BlockTime)}}
                                             </span>
-                                           
+
                                         </td>
                                         <td>
                                             Flight Time
@@ -792,7 +832,7 @@
                                 </table>
                             </div>
 
-                             <div style="padding:7px;border-bottom:1px solid #eee" class="section-header">Fuel</div>
+                            <div style="padding:7px;border-bottom:1px solid #eee" class="section-header">Fuel</div>
                             <div style="padding:0px;" class="main-bkcolor2-light-imp">
                                 <table class="section-table">
                                     <tr>
@@ -828,13 +868,13 @@
 
                                     <tr>
                                         <td>
-                                             Density
+                                            Density
                                         </td>
                                         <td style="border-right: 1px dotted #bbb">
                                             <span style="display:inline-block">{{selectedFlight.FuelDensity}}</span>
                                         </td>
                                         <td>
-                                             Total
+                                            Total
                                         </td>
                                         <td>
                                             <span style="display:inline-block">{{selectedFlight.FuelTotal}} </span>
@@ -842,7 +882,7 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                             Used
+                                            Used
                                         </td>
                                         <td style="border-right: 1px dotted #bbb">
                                             <span style="display:inline-block"> {{selectedFlight.FuelUsed}}</span>
@@ -927,75 +967,75 @@
                                 </table>
                             </div>
 
-                            
 
-                           <!-- <div style="padding:7px;border-bottom:1px solid #eee" class="section-header">RVSM Check</div>
-                            <div style="padding:0px;" class="main-bkcolor2-light-imp">
+
+                            <!-- <div style="padding:7px;border-bottom:1px solid #eee" class="section-header">RVSM Check</div>
+        <div style="padding:0px;" class="main-bkcolor2-light-imp">
+            <table class="section-table">
+                <tr>
+                    <td style="border-right: 1px dotted #bbb;color:#d9d9d9">
+                        PHASE
+                    </td>
+                    <td style="border-right: 1px dotted #bbb;color:#d9d9d9;text-align:center">
+                        CPT
+                    </td>
+                    <td style="border-right: 1px dotted #bbb;color:#d9d9d9;text-align:center">
+                        STBY
+                    </td>
+                    <td style="color:#d9d9d9;text-align:center">
+                        F/O
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border-right: 1px dotted #bbb;color:#d9d9d9">
+                        GND
+                    </td>
+                    <td style="border-right: 1px dotted #bbb;color:white;text-align:center">
+                        {{selectedFlight.RVSM_GND_CPT}}
+                    </td>
+                    <td style="border-right: 1px dotted #bbb;color:white;text-align:center">
+                        {{selectedFlight.RVSM_GND_STBY}}
+                    </td>
+                    <td style="color:#d9d9d9;text-align:center">
+                        {{selectedFlight.RVSM_GND_FO}}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border-right: 1px dotted #bbb;color:#d9d9d9">
+                        FLT
+                    </td>
+                    <td style="border-right: 1px dotted #bbb;color:white;text-align:center">
+                        {{selectedFlight.RVSM_FLT_CPT}}
+                    </td>
+                    <td style="border-right: 1px dotted #bbb;color:white;text-align:center">
+                        {{selectedFlight.RVSM_FLT_STBY}}
+                    </td>
+                    <td style="color:#d9d9d9;text-align:center">
+                        {{selectedFlight.RVSM_FLT_FO}}
+                    </td>
+                </tr>
+
+
+
+            </table>
+        </div>-->
+
+
+                            <div style="padding:0px;margin-top:10px" class="main-bkcolor2-light-imp">
                                 <table class="section-table">
-                                    <tr>
-                                        <td style="border-right: 1px dotted #bbb;color:#d9d9d9">
-                                            PHASE
-                                        </td>
-                                        <td style="border-right: 1px dotted #bbb;color:#d9d9d9;text-align:center">
-                                            CPT
-                                        </td>
-                                        <td style="border-right: 1px dotted #bbb;color:#d9d9d9;text-align:center">
-                                            STBY
-                                        </td>
-                                        <td style="color:#d9d9d9;text-align:center">
-                                            F/O
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="border-right: 1px dotted #bbb;color:#d9d9d9">
-                                            GND
-                                        </td>
-                                        <td style="border-right: 1px dotted #bbb;color:white;text-align:center">
-                                            {{selectedFlight.RVSM_GND_CPT}}
-                                        </td>
-                                        <td style="border-right: 1px dotted #bbb;color:white;text-align:center">
-                                            {{selectedFlight.RVSM_GND_STBY}}
-                                        </td>
-                                        <td style="color:#d9d9d9;text-align:center">
-                                            {{selectedFlight.RVSM_GND_FO}}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="border-right: 1px dotted #bbb;color:#d9d9d9">
-                                            FLT
-                                        </td>
-                                        <td style="border-right: 1px dotted #bbb;color:white;text-align:center">
-                                            {{selectedFlight.RVSM_FLT_CPT}}
-                                        </td>
-                                        <td style="border-right: 1px dotted #bbb;color:white;text-align:center">
-                                            {{selectedFlight.RVSM_FLT_STBY}}
-                                        </td>
-                                        <td style="color:#d9d9d9;text-align:center">
-                                            {{selectedFlight.RVSM_FLT_FO}}
-                                        </td>
-                                    </tr>
 
-
-
-                                </table>
-                            </div>-->
-
-
-                       <div style="padding:0px;margin-top:10px" class="main-bkcolor2-light-imp">
-                                <table class="section-table">
-                                   
                                     <tr>
                                         <td style="width:33.33%;text-align:left">
 
                                             <!--<span style="display:inline-block;color:#d9d9d9">ASR</span>
-                                            <span ng-show="!selectedFlight.AttASR" style="display:inline-block;color:white;margin-left:3px;"><i class="far fa-square"></i></span>
-                                            <span ng-show="selectedFlight.AttASR" style="display:inline-block;color:white"><i class="far fa-check-square"></i></span>-->
+                        <span ng-show="!selectedFlight.AttASR" style="display:inline-block;color:white;margin-left:3px;"><i class="far fa-square"></i></span>
+                        <span ng-show="selectedFlight.AttASR" style="display:inline-block;color:white"><i class="far fa-check-square"></i></span>-->
                                         </td>
                                         <td style="width:33.33%;text-align:left">
 
                                             <!--<span style="display:inline-block;color:#d9d9d9">Voyage Report</span>
-                                            <span ng-show="!selectedFlight.AttVoyageReport" style="display:inline-block;color:white;margin-left:3px;"><i class="far fa-square"></i></span>
-                                            <span ng-show="selectedFlight.AttVoyageReport" style="display:inline-block;color:white"><i class="far fa-check-square"></i></span>-->
+                        <span ng-show="!selectedFlight.AttVoyageReport" style="display:inline-block;color:white;margin-left:3px;"><i class="far fa-square"></i></span>
+                        <span ng-show="selectedFlight.AttVoyageReport" style="display:inline-block;color:white"><i class="far fa-check-square"></i></span>-->
                                         </td>
                                         <td style="width:33.33%;text-align:right">
 
@@ -1010,7 +1050,7 @@
 
                                 </table>
                             </div>
-                           
+
 
                             <div style="padding:7px;border-bottom:1px solid #eee" class="section-header">Crew</div>
                             <div style="padding:0px;" class="main-bkcolor2-light-imp">

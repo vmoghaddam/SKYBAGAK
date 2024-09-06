@@ -51,46 +51,46 @@
 			padding:7px 0 !important;
 		}
 	</style>
-<body class="dx-viewport">
-    <script>
-        function invokeCSCode(data) {
-            try {
+    <body class="dx-viewport">
+        <script>
+            function invokeCSCode(data) {
+                try {
 
-                invokeCSharpAction(data);
+                    invokeCSharpAction(data);
+                }
+                catch (err) {
+                    console.log(err);
+                }
             }
-            catch (err) {
-                console.log(err);
-            }
-        }
-    </script>
-    <div ng-app="GriffinClientApp" style=" height:100%">
-        <!-- <ng-view></ng-view>-->
-        <div class="anfade" ng-view></div>
-    </div>
+        </script>
+        <div ng-app="GriffinClientApp" style=" height:100%">
+            <!-- <ng-view></ng-view>-->
+            <div class="anfade" ng-view></div>
+        </div>
 
 
-    <script src="scripts/jquery-3.1.0.js"></script>
-	<script src="scripts/html2canvas.min.js"></script>
-    <!--<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+        <script src="scripts/jquery-3.1.0.js"></script>
+        <script src="scripts/html2canvas.min.js"></script>
+        <!--<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.4.min.js"></script>
     <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>-->
-    <script src="scripts/jszip.min.js"></script>
-	
-	 <script src="content/viewer/viewer.js"></script>
-    <link href="content/viewer/viewer.css" rel="stylesheet">
-    <script src="content/viewer/jquery-viewer.js"></script>
-	
-    <script src="scripts/angular-1.7.2.js"></script>
-    <script src="scripts/angularjs-sanitize.js"></script>
-    <script src="scripts/angular-route-1.7.2.js"></script>
-    <script src="scripts/angular-animate.js"></script>
-    <script src="scripts/angular-local-storage.min.js"></script>
-    <script src="scripts/loading-bar.min.js"></script>
-    <script type="text/javascript" src="scripts/linq.min.js"></script>
-    <script src="scripts/moment-with-locales.min.js"></script>
+        <script src="scripts/jszip.min.js"></script>
+
+        <script src="content/viewer/viewer.js"></script>
+        <link href="content/viewer/viewer.css" rel="stylesheet">
+        <script src="content/viewer/jquery-viewer.js"></script>
+
+        <script src="scripts/angular-1.7.2.js"></script>
+        <script src="scripts/angularjs-sanitize.js"></script>
+        <script src="scripts/angular-route-1.7.2.js"></script>
+        <script src="scripts/angular-animate.js"></script>
+        <script src="scripts/angular-local-storage.min.js"></script>
+        <script src="scripts/loading-bar.min.js"></script>
+        <script type="text/javascript" src="scripts/linq.min.js"></script>
+        <script src="scripts/moment-with-locales.min.js"></script>
 
 
-    <!--<script src="scripts/cldr.min.js"></script>
+        <!--<script src="scripts/cldr.min.js"></script>
     <script src="scripts/cldr/event.min.js"></script>
     <script src="scripts/cldr/supplemental.min.js"></script>
     <script src="scripts/cldr/unresolved.min.js"></script>
@@ -102,52 +102,59 @@
     <script type="text/javascript" src="scripts/globalize/date.min.js"></script>-->
 
 
-    <link rel="stylesheet" href="content/css/persian-datepicker.min.css" />
+        <link rel="stylesheet" href="content/css/persian-datepicker.min.css" />
 
-    <script src="scripts/persian-date.min.js"></script>
-    <script src="scripts/persian-datepicker.min.js"></script>
+        <script src="scripts/persian-date.min.js"></script>
+        <script src="scripts/persian-datepicker.min.js"></script>
 
-    <!--<link href="content/css/dx.common.css" rel="stylesheet" />
+        <!--<link href="content/css/dx.common.css" rel="stylesheet" />
     <link href="content/css/dx.light.css" rel="stylesheet" />-->
-    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/devextreme/20.2.6/js/dx.all.js"></script>-->
-    <script type="text/javascript" src="scripts/dx.all.js"></script>
-    <!--<script type="text/javascript" src="https://cdn3.devexpress.com/jslib/19.2.7/js/dx.all.js"></script>-->
-    <!--<script src="https://cdn3.devexpress.com/jslib/19.2.4/js/dx.all.js"></script>-->
-    <!--<script type="text/javascript" src="scripts/chart-bundle.js"></script>
+        <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/devextreme/20.2.6/js/dx.all.js"></script>-->
+        <script type="text/javascript" src="scripts/dx.all.js"></script>
+        <!--<script type="text/javascript" src="https://cdn3.devexpress.com/jslib/19.2.7/js/dx.all.js"></script>-->
+        <!--<script src="https://cdn3.devexpress.com/jslib/19.2.4/js/dx.all.js"></script>-->
+        <!--<script type="text/javascript" src="scripts/chart-bundle.js"></script>
     <script type="text/javascript" src="scripts/chart.js"></script>-->
-    <!--<script src="https://cdn.jsdelivr.net/npm/mobile-detect@1.4.4/mobile-detect.min.js"></script>-->
-    <script src="scripts/mobile-detect.min.js"></script>
-    <script src="scripts/custom-tooltip.js"></script>
-    <script src="scripts/config.js?vx=10"></script>
-    <script src="scripts/core.js?vx=10"></script>
-    <!--<script src="scripts/kit.fontawsome.js" crossorigin="anonymous"></script>-->
-    <script src="scripts/dexie4.js"></script>
-    <!--<script src="pwa.js?vx=10"></script> -->
-    <script src="app/db.js?vx=10"></script>
-    <script src="app/app.js?vx=102"></script>
+        <!--<script src="https://cdn.jsdelivr.net/npm/mobile-detect@1.4.4/mobile-detect.min.js"></script>-->
+        <!-- <script src="https://cdn.jsdelivr.net/npm/angular/angular.min.js"></script>-->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
 
-    <!-- Load services -->
-    <script src="app/services/authInterceptorService.js?vx=10"></script>
-    <script src="app/services/authService.js?vx=10"></script>
-    <script src="app/services/activityService.js?vx=10"></script>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
-    <script src="app/services/testService.js?vx=10"></script>
-    <script src="app/services/tokensManagerService.js?vx=10"></script>
-    <script src="app/services/generalService.js?vx=10"></script>
-    <script src="app/services/notificationService.js?vx=10"></script>
-    <script src="app/services/libraryService.js?vx=10"></script>
-    <script src="app/services/flightService.js?vx=101"></script>
-	<script src="app/services/mbService.js?vx=10"></script>
-    <!--<script src="app/services/service.js"></script>-->
-    <!-- Load controllers -->
-    <script src="app/controllers/indexController.js?vx=10"></script>
-    <!--<script src="app/controllers/appsController.js"></script>-->
-    <script src="app/controllers/footerController.js?vx=10"></script>
-    <script src="app/controllers/homeController.js?vx=10"></script>
-    <script src="app/controllers/loginController.js?vx=10"></script>
-    <!-- <script src="app/controllers/signupController.js"></script>-->
-    <!--<script src="app/controllers/filterController.js"></script>-->
-    <!--<script src="app/controllers/refreshController.js"></script>
+
+        <script src="scripts/mobile-detect.min.js"></script>
+        <script src="scripts/custom-tooltip.js"></script>
+        <script src="scripts/config.js?vx=10"></script>
+        <script src="scripts/core.js?vx=10"></script>
+        <!--<script src="scripts/kit.fontawsome.js" crossorigin="anonymous"></script>-->
+        <script src="scripts/dexie4.js"></script>
+        <!--<script src="pwa.js?vx=10"></script> -->
+        <script src="app/db.js?vx=10"></script>
+        <script src="app/app.js?vx=102"></script>
+
+        <!-- Load services -->
+        <script src="app/services/authInterceptorService.js?vx=10"></script>
+        <script src="app/services/authService.js?vx=10"></script>
+        <script src="app/services/activityService.js?vx=10"></script>
+
+        <script src="app/services/testService.js?vx=10"></script>
+        <script src="app/services/tokensManagerService.js?vx=10"></script>
+        <script src="app/services/generalService.js?vx=10"></script>
+        <script src="app/services/notificationService.js?vx=10"></script>
+        <script src="app/services/libraryService.js?vx=10"></script>
+        <script src="app/services/flightService.js?vx=101"></script>
+        <script src="app/services/mbService.js?vx=10"></script>
+        <!--<script src="app/services/service.js"></script>-->
+        <!-- Load controllers -->
+        <script src="app/controllers/indexController.js?vx=10"></script>
+        <!--<script src="app/controllers/appsController.js"></script>-->
+        <script src="app/controllers/footerController.js?vx=10"></script>
+        <script src="app/controllers/homeController.js?vx=10"></script>
+        <script src="app/controllers/loginController.js?vx=10"></script>
+        <!-- <script src="app/controllers/signupController.js"></script>-->
+        <!--<script src="app/controllers/filterController.js"></script>-->
+        <!--<script src="app/controllers/refreshController.js"></script>
     <script src="app/controllers/tokensManagerController.js"></script>
     <script src="app/controllers/associateController.js"></script>
 
@@ -186,100 +193,100 @@
 
     <script src="app/controllers/pdfViewer.js"></script>
     <script src="app/controllers/reportViewer.js"></script>-->
-    <script src="app/controllers/logAdd.js?vx=10"></script>
-	 
-    <script src="app/controllers/calendarController.js?vx=10"></script>
-    <script src="app/controllers/epLogBook.js?vx=10"></script>
-<script src="app/controllers/mbController.js?vx=10"></script>
-    <script src="app/controllers/taf.js?vx=10"></script>
-    <script src="app/controllers/metar.js?vx=10"></script>
-    <script src="app/controllers/notam.js?vx=10"></script>
-	<script src="app/controllers/ofpadd.js?vx=10"></script>
-	 <script src="app/controllers/signadd.js?vx=10"></script>
-	<script src="app/controllers/jl.js?vx=10"></script>
-	<script src="app/controllers/profileview.js?vx=10"></script>
-	 <script src="app/controllers/appCertificateController.js?vx=10"></script>
-	<script src="app/services/statService.js?vx=10"></script>
-    <script src="app/controllers/statController.js?vx=10"></script>
-    <script src="app/controllers/rptflightssimple.js?vx=10"></script>
-	 <script src="app/controllers/appDocumentController.js"></script>
-	 <script src="app/controllers/imageviewer.js?vx=10"></script>
-    <script src="pdfjsmodule/pdfviewernew.js?vx=10"></script>
-   	 <script src="app/controllers/appDocumentController.js?vx=10"></script>
-	  <script src="app/controllers/ldgadd.js?vx=10"></script>
-    <script src="app/controllers/toadd.js?vx=10"></script>
+        <script src="app/controllers/logAdd.js?vx=10"></script>
 
-    <script src="app/controllers/appLibraryController.js?vx=10"></script>
-	 <script src="app/controllers/camera.js?vx=10"></script>
+        <script src="app/controllers/calendarController.js?vx=10"></script>
+        <script src="app/controllers/epLogBook.js?vx=10"></script>
+        <script src="app/controllers/mbController.js?vx=10"></script>
+        <script src="app/controllers/taf.js?vx=10"></script>
+        <script src="app/controllers/metar.js?vx=10"></script>
+        <script src="app/controllers/notam.js?vx=10"></script>
+        <script src="app/controllers/ofpadd.js?vx=10"></script>
+        <script src="app/controllers/signadd.js?vx=10"></script>
+        <script src="app/controllers/jl.js?vx=10"></script>
+        <script src="app/controllers/profileview.js?vx=10"></script>
+        <script src="app/controllers/appCertificateController.js?vx=10"></script>
+        <script src="app/services/statService.js?vx=10"></script>
+        <script src="app/controllers/statController.js?vx=10"></script>
+        <script src="app/controllers/rptflightssimple.js?vx=10"></script>
+        <script src="app/controllers/appDocumentController.js"></script>
+        <script src="app/controllers/imageviewer.js?vx=10"></script>
+        <script src="pdfjsmodule/pdfviewernew.js?vx=10"></script>
+        <script src="app/controllers/appDocumentController.js?vx=10"></script>
+        <script src="app/controllers/ldgadd.js?vx=10"></script>
+        <script src="app/controllers/toadd.js?vx=10"></script>
 
-    <script src="app/controllers/forms.js?vx=10"></script>
-    <script>
-        function __IsOnline() {
-            if (navigator.onLine) {
-                return true;
+        <script src="app/controllers/appLibraryController.js?vx=10"></script>
+        <script src="app/controllers/camera.js?vx=10"></script>
+
+        <script src="app/controllers/forms.js?vx=10"></script>
+        <script>
+            function __IsOnline() {
+                if (navigator.onLine) {
+                    return true;
+                }
+                return false;
             }
-            return false;
-        }
-        function goBack() {
-            var current = window.location.href;
-            var old = document.referrer;
-            window.history.back();
-        }
-        function display(msg) {
-            alert(msg);
-
-        }
-        function exportLoginData(dto) {
-
-            try {
-                Native("exportLoginData", dto);
+            function goBack() {
+                var current = window.location.href;
+                var old = document.referrer;
+                window.history.back();
             }
-            catch (e) {
-                // alert(e);
+            function display(msg) {
+                alert(msg);
+
             }
-        }
-        function exportLogoutData() {
+            function exportLoginData(dto) {
 
-            try {
-                Native("exportLogoutData", "logout");
+                try {
+                    Native("exportLoginData", dto);
+                }
+                catch (e) {
+                    // alert(e);
+                }
             }
-            catch (e) {
-                // alert(e);
+            function exportLogoutData() {
+
+                try {
+                    Native("exportLogoutData", "logout");
+                }
+                catch (e) {
+                    // alert(e);
+                }
             }
-        }
-        function exportCurrentUrl(url) {
+            function exportCurrentUrl(url) {
 
-            try {
-                Native("exportCurrentUrl", url);
+                try {
+                    Native("exportCurrentUrl", url);
+                }
+                catch (e) {
+                    // alert(e);
+                }
             }
-            catch (e) {
-                // alert(e);
+
+            function invokeCSCode1(data) {
+                try {
+
+                    invokeCSharpAction(data);
+                }
+                catch (err) {
+                    alert(err);
+                }
             }
-        }
 
-        function invokeCSCode1(data) {
-            try {
+            window.onload = function () {
+                window.addEventListener('offline', function (e) {
+                    window.postMessage("offline", "*");
+                });
 
-                invokeCSharpAction(data);
-            }
-            catch (err) {
-                alert(err);
-            }
-        }
+                window.addEventListener('online', function (e) { window.postMessage("online", "*"); });
 
-        window.onload = function () {
-            window.addEventListener('offline', function (e) {
-                window.postMessage("offline", "*");
-            });
+                window.addEventListener("message", (event) => {
 
-            window.addEventListener('online', function (e) { window.postMessage("online", "*"); });
-
-            window.addEventListener("message", (event) => {
-
-            }, false);
-        };
-    </script>
+                }, false);
+            };
+        </script>
 
 
-</body>
+    </body>
 </html>

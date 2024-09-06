@@ -360,58 +360,72 @@ namespace APCore.Services
             if (fl != "-1")
                 docs = docs.Where(q => q.FL == fl).ToList();
             List<string> results = new List<string>();
+            List<string> errors = new List<string>();
+            System.Net.ServicePointManager.SecurityProtocol = (System.Net.SecurityProtocolType)(768 | 3072);
             foreach (var doc in docs)
             {
-                var result = "WIND_ADDS_" + (string.IsNullOrEmpty(dtstr)? DateTime.Now.ToString("yyyyMMdd"):dtstr) + "_FL" + doc.FL + "_VALID" + doc.Valid + ".png";
-                var result2 = "WIND_ADDS_" + DateTime.Now.ToString("yyyyMMdd") + "_FL" + doc.FL + "_VALID" + doc.Valid + "_XXXX.png";
-                results.Add(result);
-                string webRootPath = _webHostEnvironment.ContentRootPath;
-                string path = "";
-                path = Path.Combine(webRootPath, "Upload", "Weather", "WIND", "ADDS", result);
-                var path2 = Path.Combine(webRootPath, "Upload", "Weather", "WIND", "ADDS", result2);
-                var url = _configuration["WeatherUrls:SIGWX_WIND"];
-                using (WebClient webClient = new WebClient())
+                try
                 {
-                    //F12_wind_340_d
-                    // result.Add(new ADDSWindUrl() { FL = "340", Valid = "06", Url = "2843" });
-                    var _img_url = "F" + doc.Valid + "_" + "wind_" + doc.FL + "_d" + ".gif";
-                    byte[] data = webClient.DownloadData(url + /*doc.Url + ".gif"*/_img_url);
-
-                    using (MemoryStream mem = new MemoryStream(data))
+                    var result = "WIND_ADDS_" + (string.IsNullOrEmpty(dtstr) ? DateTime.Now.ToString("yyyyMMdd") : dtstr) + "_FL" + doc.FL + "_VALID" + doc.Valid + ".png";
+                    var result2 = "WIND_ADDS_" + DateTime.Now.ToString("yyyyMMdd") + "_FL" + doc.FL + "_VALID" + doc.Valid + "_XXXX.png";
+                    results.Add(result);
+                    string webRootPath = _webHostEnvironment.ContentRootPath;
+                    string path = "";
+                    path = Path.Combine(webRootPath, "Upload", "Weather", "WIND", "ADDS", result);
+                    var path2 = Path.Combine(webRootPath, "Upload", "Weather", "WIND", "ADDS", result2);
+                    var url = _configuration["WeatherUrls:SIGWX_WIND"];
+                    using (WebClient webClient = new WebClient())
                     {
-                        MagickImage image = new MagickImage(mem);
-                        image.Rotate(270);
-                         image.Resize(new Percentage(getImagePercentage(fl)));
-                        //image.Quality = 10;
-                        image.ColorType = ColorType.Grayscale;
-                        image.Write(path,MagickFormat.Png8);
-                        //using (var yourImage = System.Drawing.Image.FromStream(mem))
-                        //{
-                        //    // If you want it as Png
-                        //    //var h =Convert.ToInt32( Math.Round( (yourImage.Height*0.8)));
-                        //    //var img = ScaleImage(yourImage, h);
-                        //    yourImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
-                        //   // var image2 = yourImage.GetThumbnailImage(yourImage.Width, yourImage.Height, null, System.IntPtr.Zero);
-                        //   ;
+                        //F12_wind_340_d
+                        // result.Add(new ADDSWindUrl() { FL = "340", Valid = "06", Url = "2843" });
+                        var _img_url = "F" + doc.Valid + "_" + "wind_" + doc.FL + "_d" + ".gif";
+                        byte[] data = webClient.DownloadData(url + /*doc.Url + ".gif"*/_img_url);
 
-                        //    yourImage.Save(path, System.Drawing.Imaging.ImageFormat.Png);
-                        //   // image2.Save(path2, System.Drawing.Imaging.ImageFormat.Png);
+                        using (MemoryStream mem = new MemoryStream(data))
+                        {
+                            MagickImage image = new MagickImage(mem);
+                            image.Rotate(270);
+                            image.Resize(new Percentage(getImagePercentage(fl)));
+                            //image.Quality = 10;
+                            image.ColorType = ColorType.Grayscale;
+                            image.Write(path, MagickFormat.Png8);
+                            using (var yourImage = System.Drawing.Image.FromStream(mem))
+                            {
+                                // If you want it as Png
+                                //var h =Convert.ToInt32( Math.Round( (yourImage.Height*0.8)));
+                                //var img = ScaleImage(yourImage, h);
+                                yourImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                                // var image2 = yourImage.GetThumbnailImage(yourImage.Width, yourImage.Height, null, System.IntPtr.Zero);
+                                ;
 
-                        //    // If you want it as Jpeg
-                        //    //yourImage.Save("path_to_your_file.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
-                        //}
+                                yourImage.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+                                // image2.Save(path2, System.Drawing.Imaging.ImageFormat.Png);
+
+                                // If you want it as Jpeg
+                                //yourImage.Save("path_to_your_file.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                            }
+                        }
+
                     }
+                    Task.Delay(1000).Wait();
+                }
+                catch (Exception ex) {
+                    var msg =doc.FL+"    "+doc.Valid+"    "+ ex.Message;
+                    if (ex.InnerException != null)
+                        msg += "   " + ex.InnerException.Message;
+
+                    errors.Add(msg);
 
                 }
-                Task.Delay(1000).Wait();
+                
             }
 
 
             return new DataResponse
             {
                 Data = results,
-                Errors = null,
-                IsSuccess = true
+                Errors = errors,
+                IsSuccess = errors.Count==0
             };
         }
 

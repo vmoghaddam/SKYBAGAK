@@ -1023,35 +1023,35 @@ namespace APCore.Services
 
 
 
-            if (log.PaxAdult != null && checkLogProp(log.PaxAdultDt, "PaxAdult", props))
-            {
-                updateProp(flight.ID, log.CrewId, "PaxAdult", log.PaxAdultDt, log.PaxAdult.ToString(), props);
-                flight.PaxAdult = log.PaxAdult;
-            }
-            if (log.PaxMale != null && checkLogProp(log.PaxMaleDt, "PaxMale", props))
-            {
-                updateProp(flight.ID, log.CrewId, "PaxMale", log.PaxMaleDt, log.PaxMale.ToString(), props);
-                flight.PaxMale = log.PaxMale;
-            }
-            if (log.PaxFemale != null && checkLogProp(log.PaxFemaleDt, "PaxFemale", props))
-            {
-                updateProp(flight.ID, log.CrewId, "PaxFemale", log.PaxFemaleDt, log.PaxFemale.ToString(), props);
-                flight.PaxFemale = log.PaxFemale;
-            }
+            //if (log.PaxAdult != null && checkLogProp(log.PaxAdultDt, "PaxAdult", props))
+            //{
+            //    updateProp(flight.ID, log.CrewId, "PaxAdult", log.PaxAdultDt, log.PaxAdult.ToString(), props);
+            //    flight.PaxAdult = log.PaxAdult;
+            //}
+            //if (log.PaxMale != null && checkLogProp(log.PaxMaleDt, "PaxMale", props))
+            //{
+            //    updateProp(flight.ID, log.CrewId, "PaxMale", log.PaxMaleDt, log.PaxMale.ToString(), props);
+            //    flight.PaxMale = log.PaxMale;
+            //}
+            //if (log.PaxFemale != null && checkLogProp(log.PaxFemaleDt, "PaxFemale", props))
+            //{
+            //    updateProp(flight.ID, log.CrewId, "PaxFemale", log.PaxFemaleDt, log.PaxFemale.ToString(), props);
+            //    flight.PaxFemale = log.PaxFemale;
+            //}
 
 
-            if (log.PaxChild != null && checkLogProp(log.PaxChildDt, "PaxAdult", props))
-            {
-                updateProp(flight.ID, log.CrewId, "PaxChild", log.PaxChildDt, log.PaxChild.ToString(), props);
-                flight.PaxChild = log.PaxChild;
-            }
+            //if (log.PaxChild != null && checkLogProp(log.PaxChildDt, "PaxChild", props))
+            //{
+            //    updateProp(flight.ID, log.CrewId, "PaxChild", log.PaxChildDt, log.PaxChild.ToString(), props);
+            //    flight.PaxChild = log.PaxChild;
+            //}
 
 
-            if (log.PaxInfant != null && checkLogProp(log.PaxInfantDt, "PaxInfant", props))
-            {
-                updateProp(flight.ID, log.CrewId, "PaxInfant", log.PaxInfantDt, log.PaxInfant.ToString(), props);
-                flight.PaxInfant = log.PaxInfant;
-            }
+            //if (log.PaxInfant != null && checkLogProp(log.PaxInfantDt, "PaxInfant", props))
+            //{
+            //    updateProp(flight.ID, log.CrewId, "PaxInfant", log.PaxInfantDt, log.PaxInfant.ToString(), props);
+            //    flight.PaxInfant = log.PaxInfant;
+            //}
 
 
 

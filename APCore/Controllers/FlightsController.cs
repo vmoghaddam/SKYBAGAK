@@ -87,8 +87,10 @@ namespace APCore.Controllers
         {
             try
             {
-                var userData = User.FindFirst(ClaimTypes.UserData).Value;
-                var crewId = Objects.AuthDataHelper.GetEmployeeId(userData);
+                // var userData = User.FindFirst(ClaimTypes.UserData).Value;
+
+                // var crewId = Objects.AuthDataHelper.GetEmployeeId(userData);
+                int crewId = 4829;
                 var result = await _flightService.GetCrewFlights(crewId, from, to);
                 if (!result.IsSuccess)
                     return Ok(result.Errors);

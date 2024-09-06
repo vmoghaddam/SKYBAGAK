@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UIKarun", "UIKarun\UIKarun.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GRH", "GRH\GRH.csproj", "{1F905FA2-8D78-4450-9EB3-4FEA33C02545}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UIVaresh", "UIVaresh\UIVaresh.csproj", "{3A423F5F-BF0C-41BD-84B9-8E6502E68404}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{1F905FA2-8D78-4450-9EB3-4FEA33C02545}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F905FA2-8D78-4450-9EB3-4FEA33C02545}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F905FA2-8D78-4450-9EB3-4FEA33C02545}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A423F5F-BF0C-41BD-84B9-8E6502E68404}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A423F5F-BF0C-41BD-84B9-8E6502E68404}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A423F5F-BF0C-41BD-84B9-8E6502E68404}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A423F5F-BF0C-41BD-84B9-8E6502E68404}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

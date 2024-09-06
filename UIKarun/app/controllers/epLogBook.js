@@ -117,7 +117,7 @@ app.controller('epLogBookController', ['$scope', '$location', '$routeParams', '$
     };
     //  $scope.dt_from = new Date(2021,9, 28);
     //  $scope.dt_to = new Date(2021, 7, 26);
-    $scope.dt_from = (new Date());//.addDays(-10);
+    $scope.dt_from = (new Date()).addDays(-10);
     $scope.dt_to = (new Date($scope.dt_from)).addDays(0);
     $scope.date_from = {
         displayFormat: "yy MMM dd",
@@ -369,11 +369,117 @@ app.controller('epLogBookController', ['$scope', '$location', '$routeParams', '$
         if (item.DutyType == 1165)
             $scope.bindCrews($scope.selectedFlight.FlightId);
 
-
-
+        
+        //charts
+        
 
 
     };
+
+
+
+
+    // Flight data for the chart
+    var flightData = {
+        x: ['08:10', '08:30', '10:00', '12:43', '11:55'], // STD, ETD, Cruise, ETA, STA
+        y: [0, 30, 60, 30, 0], // Altitude points
+        mode: 'lines', // Only lines, no markers
+        line: { shape: 'spline', width: 3, color: '#00BFFF' },
+        name: 'Flight Path',
+        hoverinfo: 'none',  // Disable hover labels on points
+    };
+
+    var layout = {
+        title: '',
+        xaxis: {
+            title: 'Flight Route',
+            zeroline: false,
+            showgrid: false,
+            showline: false,
+            tickvals: ['08:10', '08:30', '10:00', '12:43', '11:55'],
+            ticktext: ['UUDD', 'ETD 08:30', 'G6404', 'ETA 12:43', 'UDYZ'],
+            showticklabels: true,
+        },
+        yaxis: {
+            title: 'Altitude (FL)',
+            zeroline: false,
+            showgrid: false,
+            showline: false,
+            range: [0, 70],
+            tickvals: [0, 30, 60],
+            ticktext: ['0', '30', '60'],
+        },
+        shapes: [
+            // Vertical line at STD (08:10)
+            {
+                type: 'line',
+                xref: 'x',
+                yref: 'paper',
+                x0: '08:10',
+                y0: 0,
+                x1: '08:10',
+                y1: 1,
+                line: {
+                    color: 'green',
+                    width: 2,
+                    dash: 'dot',
+                },
+            },
+            // Vertical line at ETD (08:30)
+            {
+                type: 'line',
+                xref: 'x',
+                yref: 'paper',
+                x0: '08:30',
+                y0: 0,
+                x1: '08:30',
+                y1: 1,
+                line: {
+                    color: 'blue',
+                    width: 2,
+                    dash: 'dot',
+                },
+            },
+            // Vertical line at ETA (12:43)
+            {
+                type: 'line',
+                xref: 'x',
+                yref: 'paper',
+                x0: '12:43',
+                y0: 0,
+                x1: '12:43',
+                y1: 1,
+                line: {
+                    color: 'orange',
+                    width: 2,
+                    dash: 'dot',
+                },
+            },
+            // Vertical line at STA (11:55)
+            {
+                type: 'line',
+                xref: 'x',
+                yref: 'paper',
+                x0: '11:55',
+                y0: 0,
+                x1: '11:55',
+                y1: 1,
+                line: {
+                    color: 'red',
+                    width: 2,
+                    dash: 'dot',
+                },
+            }
+        ],
+        showlegend: false,
+        margin: { t: 50, r: 20, b: 50, l: 50 },
+        hovermode: false,  // Disable hover mode entirely
+    };
+
+    var config = { responsive: true };
+
+    // Plotly.js chart initialization inside AngularJS controller
+    Plotly.newPlot('chart-container', [flightData], layout, config);
     ///////////////////////////
     $scope.overwriteLocal = function () {
         $scope.loadingVisible = true;
@@ -3033,9 +3139,11 @@ return;
 		
 		//END OF WINDY
 		/////////////////
-	};
+    };
 
-    ////////////////////
+
+
+   
     var appWindow = angular.element($window);
     appWindow.bind('resize', function () {
         //alert('w: '+$(window).width());
