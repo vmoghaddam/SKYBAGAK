@@ -117,7 +117,7 @@ app.controller('epLogBookController', ['$scope', '$location', '$routeParams', '$
     };
     //  $scope.dt_from = new Date(2021,9, 28);
     //  $scope.dt_to = new Date(2021, 7, 26);
-    $scope.dt_from = (new Date()).addDays(-10);
+    $scope.dt_from = (new Date()).addDays(-14);
     $scope.dt_to = (new Date($scope.dt_from)).addDays(0);
     $scope.date_from = {
         displayFormat: "yy MMM dd",
@@ -355,6 +355,355 @@ app.controller('epLogBookController', ['$scope', '$location', '$routeParams', '$
     $scope.getSelectedClass = function () {
         return $scope.selectedFlight ? "button-on" : "button-off";
     };
+    
+
+
+
+
+    //// Flight data for the chart
+    //var flightData = {
+    //    x: ['08:10', '08:30', '10:00', '12:43', '11:55'], // STD, ETD, Cruise, ETA, STA
+    //    y: [0, 30, 60, 30, 0], // Altitude points
+    //    mode: 'lines', // Only lines, no markers
+    //    line: { shape: 'spline', width: 3, color: '#306b65' }, // Set main line color to #306b65
+    //    name: 'Flight Path',
+    //    hoverinfo: 'none',  // Disable hover labels on points
+    //};
+
+    //var layout = {
+    //    title: {
+    //        text: 'Flight Path',
+    //        font: {
+    //            color: '#ffffff' // White color for the title
+    //        }
+    //    },
+    //    xaxis: {
+    //        title: {
+    //            text: 'Flight Route',
+    //            font: {
+    //                color: '#ffffff' // White color for x-axis title
+    //            }
+    //        },
+    //       // zeroline: false,
+    //        showgrid: true,
+    //        gridcolor:'yellow',
+    //        showline: true,
+    //        tickvals: ['08:10', '08:30', '10:00', '12:43', '11:55'],
+    //        ticktext: ['STD', 'ETD 08:30', 'G6404', 'ETA 12:43', 'STA'], // Updated tick text
+    //        tickfont: {
+    //            color: '#ffffff' // White color for x-axis tick labels
+    //        },
+    //        ticklabelposition: "outside", // Ensure tick labels are outside the axis
+    //       // ticklabelpadding: 200, // Increase the space between tick labels and the x-axis
+    //        ticklabelstandoff: 20, // Adds space between tick labels and x-axis
+    //        showticklabels: true,
+    //        automargin: true,
+            
+    //    },
+    //    yaxis: {
+    //        title: {
+    //            text: 'Altitude (FL)',
+    //            font: {
+    //                color: '#ffffff' // White color for y-axis title
+    //            }
+    //        },
+    //        zeroline: false,
+    //        showgrid: true,
+    //        showline: false,
+    //        range: [0, 70],
+    //        tickvals: [0, 30, 60],
+    //        ticktext: ['0', '30', '60'],
+    //        tickfont: {
+    //            color: '#ffffff' // White color for y-axis tick labels
+    //        }
+    //    },
+    //    _shapes: [
+    //        // Vertical line at STD (08:10)
+    //        {
+    //            type: 'line',
+    //            xref: 'x',
+    //            yref: 'paper',
+    //            x0: '08:10',
+    //            y0: 0,
+    //            x1: '08:10',
+    //            y1: 1,
+    //            line: {
+    //                color: '#476b6b', // Set vertical line color to #476b6b
+    //                width: 2,
+    //                dash: 'dot'
+    //            }
+    //        },
+    //        // Vertical line at ETD (08:30)
+    //        {
+    //            type: 'line',
+    //            xref: 'x',
+    //            yref: 'paper',
+    //            x0: '08:30',
+    //            y0: 0,
+    //            x1: '08:30',
+    //            y1: 1,
+    //            line: {
+    //                color: '#476b6b', // Set vertical line color to #476b6b
+    //                width: 2,
+    //                dash: 'dot'
+    //            }
+    //        },
+    //        // Vertical line at ETA (12:43)
+    //        {
+    //            type: 'line',
+    //            xref: 'x',
+    //            yref: 'paper',
+    //            x0: '12:43',
+    //            y0: 0,
+    //            x1: '12:43',
+    //            y1: 1,
+    //            line: {
+    //                color: '#476b6b', // Set vertical line color to #476b6b
+    //                width: 2,
+    //                dash: 'dot'
+    //            }
+    //        },
+    //        // Vertical line at STA (11:55)
+    //        {
+    //            type: 'line',
+    //            xref: 'x',
+    //            yref: 'paper',
+    //            x0: '11:55',
+    //            y0: 0,
+    //            x1: '11:55',
+    //            y1: 1,
+    //            line: {
+    //                color: '#476b6b', // Set vertical line color to #476b6b
+    //                width: 2,
+    //                dash: 'dot'
+    //            }
+    //        }
+    //    ],
+    //    plot_bgcolor: '#363640', // Set plot background color
+    //    paper_bgcolor: '#363640', // Set entire chart background color
+    //    showlegend: false,
+    //    margin: { t: 50, r: 20, b: 80, l: 50 }, // Increased bottom margin to add space
+    //    hovermode: false  // Disable hover mode entirely
+    //};
+
+    //var config = { responsive: true };
+
+    //// Plotly.js chart initialization inside AngularJS controller
+    //Plotly.newPlot('chart-container', [flightData], layout, config);
+
+
+
+    /////////////////////////////
+    $scope.initializeChart_ = function () {
+        $scope.chartDom = $('#chart-container')[0]; // Get the DOM element using jQuery
+        $scope.myChart = echarts.init($scope.chartDom);
+
+        $scope.option = {
+            title: {
+                text: 'Flight Path',
+                textStyle: {
+                    color: '#ffffff' // White title
+                }
+            },
+            xAxis: {
+                type: 'category',
+                //data: ['08:10', '08:30', '10:00', '12:43', '11:55'], // X-axis data points (Flight times)
+                data: ['STD', 'ETD 08:30', 'G6404', 'ETA 12:43', 'STA'],
+                axisLine: {
+                    show: false // Hide x-axis line
+                },
+                //axisLabel: {
+                //    color: '#ffffff', // White x-axis label color
+                //    formatter: function (value, index) {
+                //        // Custom tick labels
+                //        var customLabels = ['STD', 'ETD 08:30', 'G6404', 'ETA 12:43', 'STA'];
+                //        return customLabels[index];
+                //    },
+                //    margin: 20 // Adds space between labels and axis
+                //},
+                axisTick: {
+                    alignWithLabel: true
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: 'yellow' // Grid line color
+                    }
+                }
+            },
+            yAxis: {
+                type: 'value',
+                min: 0,
+                max: 70,
+                interval: 30, // Set interval to match the points (0, 30, 60)
+                axisLine: {
+                    lineStyle: {
+                        color: '#ffffff' // White y-axis line
+                    }
+                },
+                axisLabel: {
+                    color: '#ffffff', // White y-axis label color
+                    formatter: function (value) {
+                        // Only show labels for 0, 30, 60
+                        if (value === 0 || value === 30 || value === 60) {
+                            return value;
+                        }
+                        return ''; // Hide other labels
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: '#363640' // Use background color to hide grid lines
+                    }
+                }
+            },
+            series: [{
+                data: [0, 30, 60, 30, 0], // Altitude points
+                type: 'line',
+                smooth: true, // Make the line smooth like 'spline'
+                lineStyle: {
+                    color: '#306b65', // Main line color
+                    width: 3
+                },
+                showSymbol: false, // Remove markers on data points
+                markLine: {
+                    //data: [
+                    //    { xAxis: '08:10', name: 'STD', lineStyle: { color: '#476b6b', type: 'dotted' } },
+                    //    { xAxis: '08:30', name: 'ETD', lineStyle: { color: '#476b6b', type: 'dotted' } },
+                    //    { xAxis: '12:43', name: 'ETA', lineStyle: { color: '#476b6b', type: 'dotted' } },
+                    //    { xAxis: '11:55', name: 'STA', lineStyle: { color: '#476b6b', type: 'dotted' } }
+                    //],
+                     data: [
+                        { xAxis: 'STD', name: 'STD', lineStyle: { color: '#476b6b', type: 'dotted' } },
+                        { xAxis: 'ETD 08:30', name: 'ETD', lineStyle: { color: '#476b6b', type: 'dotted' } },
+                        { xAxis: 'ETA 12:43', name: 'ETA', lineStyle: { color: '#476b6b', type: 'dotted' } },
+                        { xAxis: 'STA', name: 'STA', lineStyle: { color: '#476b6b', type: 'dotted' } }
+                    ],
+                    symbol: 'none', // Disable arrows on markLine
+                    label: { show: false } // Hide markLine labels
+                }
+            }],
+            backgroundColor: '#363640', // Chart background color
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'line'
+                },
+                show: false // Disable hover tooltips
+            }
+        };
+
+
+
+        // Set chart options using $scope
+        $scope.myChart.setOption($scope.option);
+    };
+
+
+    $scope.initializeChart = function () {
+        // Initial data
+        $scope.xAxisData = ['STD', 'ETD', 'G6404', 'ETA', 'STA']; // X-axis labels
+        $scope.seriesData = [0, 30, 60, 30, 0]; // Altitude points
+
+        // Initialize the chart
+        $scope.chartDom = $('#chart-container')[0]; // Get the DOM element using jQuery
+        $scope.myChart = echarts.init($scope.chartDom);
+
+        // Define chart options
+        $scope.option = {
+            title: {
+                text: '', // No title needed
+            },
+            xAxis: {
+                type: 'category',
+                data: $scope.xAxisData, // Bind x-axis data
+                axisLine: {
+                    show: false // Hide x-axis line
+                },
+                axisTick: {
+                    alignWithLabel: true // Align ticks with labels
+                },
+                axisLabel: {
+                    color: '#ffffff', // White labels
+                    fontSize: 14, // Set font size to match the image
+                    formatter: function (value, index) {
+                        // Custom tick labels with times
+                        const labels = ['STD\n08:10', 'ETD\n08:30', 'G6404', 'ETA\n12:43', 'STA\n11:55'];
+                        return labels[index];
+                    },
+                    padding: [10, 0, 0, 0], // Add padding to move labels further from axis
+                    align: 'center',
+                },
+                splitLine: {
+                    show: false // No grid lines
+                }
+            },
+            yAxis: {
+                show: false // Hide the y-axis since it's not visible in the image
+            },
+            series: [{
+                data: $scope.seriesData, // Bind series data
+                type: 'line',
+                smooth: true, // Smooth the line to make it look like the image
+                lineStyle: {
+                    color: '#306b65', // Keep original line color
+                    width: 3
+                },
+                symbol: 'circle', // Add circular markers at the points
+                symbolSize: 8, // Marker size
+                itemStyle: {
+                    color: '#306b65' // Keep original marker color
+                },
+                label: {
+                    show: true,
+                    position: 'top',
+                    distance: 15, // Position label above the marker
+                    formatter: function (params) {
+                        if (params.dataIndex === 2) {
+                            return 'G6404'; // Add 'G6404' at the top of the curve
+                        }
+                        return '';
+                    },
+                    color: '#ffffff', // White label color
+                    fontSize: 14
+                }
+            }],
+            backgroundColor: '#363640', // Keep the original background color
+            tooltip: {
+                show: false // Disable tooltips
+            }
+        };
+
+        // Initial chart setup
+        $scope.myChart.setOption($scope.option);
+
+        // Watch for changes in xAxisData or seriesData and update the chart dynamically
+        $scope.$watchGroup(['xAxisData', 'seriesData'], function (newValues) {
+            // Update x-axis and series data in the chart
+            $scope.myChart.setOption({
+                xAxis: {
+                    data: newValues[0] // Update x-axis data
+                },
+                series: [{
+                    data: newValues[1] // Update series data
+                }]
+            });
+        });
+    };
+
+    // Example of dynamically updating the chart data at runtime
+    $scope.updateChartData = function () {
+        // Example of new data
+        $scope.xAxisData = ['STD', 'ETD', 'G6483', 'ETA', 'STA']; // New x-axis labels
+        $scope.seriesData = [0, 35, 55, 35, 0]; // New altitude points
+
+        // The chart will automatically update since we are watching the xAxisData and seriesData
+    };
+
+    // Initialize the chart
+    $scope.initializeChart();
+
+
+
     $scope.showFlight = function (item, items, index) {
 
         $scope.lastFlight = items.length - 1 == index;
@@ -369,117 +718,13 @@ app.controller('epLogBookController', ['$scope', '$location', '$routeParams', '$
         if (item.DutyType == 1165)
             $scope.bindCrews($scope.selectedFlight.FlightId);
 
-        
+
         //charts
-        
 
+        $scope.xAxisData = ['STD', 'ETD', 'G6404', 'ETA', 'STA']; // X-axis labels
+        $scope.seriesData = [0, 0, 60, 0, 0]; // Altitude points
 
     };
-
-
-
-
-    // Flight data for the chart
-    var flightData = {
-        x: ['08:10', '08:30', '10:00', '12:43', '11:55'], // STD, ETD, Cruise, ETA, STA
-        y: [0, 30, 60, 30, 0], // Altitude points
-        mode: 'lines', // Only lines, no markers
-        line: { shape: 'spline', width: 3, color: '#00BFFF' },
-        name: 'Flight Path',
-        hoverinfo: 'none',  // Disable hover labels on points
-    };
-
-    var layout = {
-        title: '',
-        xaxis: {
-            title: 'Flight Route',
-            zeroline: false,
-            showgrid: false,
-            showline: false,
-            tickvals: ['08:10', '08:30', '10:00', '12:43', '11:55'],
-            ticktext: ['UUDD', 'ETD 08:30', 'G6404', 'ETA 12:43', 'UDYZ'],
-            showticklabels: true,
-        },
-        yaxis: {
-            title: 'Altitude (FL)',
-            zeroline: false,
-            showgrid: false,
-            showline: false,
-            range: [0, 70],
-            tickvals: [0, 30, 60],
-            ticktext: ['0', '30', '60'],
-        },
-        shapes: [
-            // Vertical line at STD (08:10)
-            {
-                type: 'line',
-                xref: 'x',
-                yref: 'paper',
-                x0: '08:10',
-                y0: 0,
-                x1: '08:10',
-                y1: 1,
-                line: {
-                    color: 'green',
-                    width: 2,
-                    dash: 'dot',
-                },
-            },
-            // Vertical line at ETD (08:30)
-            {
-                type: 'line',
-                xref: 'x',
-                yref: 'paper',
-                x0: '08:30',
-                y0: 0,
-                x1: '08:30',
-                y1: 1,
-                line: {
-                    color: 'blue',
-                    width: 2,
-                    dash: 'dot',
-                },
-            },
-            // Vertical line at ETA (12:43)
-            {
-                type: 'line',
-                xref: 'x',
-                yref: 'paper',
-                x0: '12:43',
-                y0: 0,
-                x1: '12:43',
-                y1: 1,
-                line: {
-                    color: 'orange',
-                    width: 2,
-                    dash: 'dot',
-                },
-            },
-            // Vertical line at STA (11:55)
-            {
-                type: 'line',
-                xref: 'x',
-                yref: 'paper',
-                x0: '11:55',
-                y0: 0,
-                x1: '11:55',
-                y1: 1,
-                line: {
-                    color: 'red',
-                    width: 2,
-                    dash: 'dot',
-                },
-            }
-        ],
-        showlegend: false,
-        margin: { t: 50, r: 20, b: 50, l: 50 },
-        hovermode: false,  // Disable hover mode entirely
-    };
-
-    var config = { responsive: true };
-
-    // Plotly.js chart initialization inside AngularJS controller
-    Plotly.newPlot('chart-container', [flightData], layout, config);
     ///////////////////////////
     $scope.overwriteLocal = function () {
         $scope.loadingVisible = true;

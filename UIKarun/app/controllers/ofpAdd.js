@@ -854,6 +854,8 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
     $scope.takeoff = null;
     $scope.landing = null;
     $scope.onblock = null;
+
+   
     $scope.fillETA = function () {
         if ($scope.flight.TakeOff) {
             var tos = moment(CreateDate($scope.flight.TakeOff)).format('HHmm');
@@ -978,8 +980,16 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
            // diff_used = 0;
            // first_fuel = first_fuel - 0;
+
+            route[0].ZoneFuel = taxi;
+            route[0].CumulativeFuel = taxi;
+
+
             route[0].FuelUsed2 = Number(route[0].FuelUsed) + diff_used;
             route[0].CumulativeFuel2 = Number(route[0].CumulativeFuel) + diff_used;
+
+          //  console.log('ZZZZSSSS', route[0]);
+            
 
         }
         if (type == "alt") {
@@ -1178,7 +1188,33 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
         });
     }
 
+    $scope.get_eta = function (x, type, idx) {
+        if (idx == 0)
+            return x.ETA;
 
+        var eta = x.ETA;
+        var fp = null;
+        if (type == 'main' && $scope.entity.main_route && $scope.entity.main_route.length > 0 && $scope.entity.main_route[0].ATA) {
+            fp = $scope.entity.main_route[0];
+            var f_eta = _toNum(fp.ETA.substr(0, 2)) * 60 + _toNum(fp.ETA.substr(2, 2));
+            var f_ata = _toNum(fp.ATA.substr(0, 2)) * 60 + _toNum(fp.ATA.substr(2, 2));
+            var diff = f_ata - f_eta;
+            var x_eta = _toNum(x.ETA.substr(0, 2)) * 60 + _toNum(x.ETA.substr(2, 2));
+            x_eta = x_eta + diff;
+            eta = time_convert(x_eta);
+        }
+        
+
+        return eta;
+    }
+    $scope.get_cum_act_used = function (x) {
+       // if (x.WayPoint == 'DEKBA')
+       // console.log('cum_act',x.WayPoint + '   ' + x.CumulativeFuel + '    ' + x.ZoneFuel + '    ' + x.FuelUsedActual);
+       // return Number(x.CumulativeFuel) + (-Number(x.ZoneFuel) + Number(x.FuelUsedActual));
+        if ($scope.ref_fuel && x.FuelRemainedActual)
+            return $scope.ref_fuel - x.FuelRemainedActual;
+        else return null;
+    };
     $scope.eta_upd_dto = [];
     $scope.recal_eta = false;
     $scope.fill_eta = function (route, type, callback, refresh) {
@@ -1442,8 +1478,10 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
         var last_point = $scope.entity.main_route[$scope.entity.main_route.length - 1];
         if (!last_point)
             return null;
+        
         if (last_point.ATA) {
-            var _arr = _toNum(last_point.ATA.toString().substr(0, 2)) * 60 + _toNum(last_point.ATA.toString().substr(2, 2)) + Number($scope.entity.ManeuveringTime);
+            var _arr = _toNum(last_point.ATA.toString().substr(0, 2)) * 60 + _toNum(last_point.ATA.toString().substr(2, 2)) + Number($scope.entity.root.ManeuveringTime);
+           // alert(last_point.ATA + '    ' + $scope.entity.ManeuveringTime);
             return $scope.int_to_time( _arr);
         }
         else {
@@ -1711,7 +1749,8 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
                             var exs = ['pax_adult', 'pax_child', 'pax_infant'];
                             $.each(keys_root, function (_i, _k) {
                                 if (!exs.includes(_k)) {
-                                    $('#prop-root-' + _k).val(data.root[_k]);
+                                 //   $('#prop-root-' + _k).val(data.root[_k]);
+                                    $("[id=prop-root-" + _k + "]").val(data.root[_k]); 
 
                                 }
                                 else {
@@ -1985,15 +2024,17 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
     }
 
     $scope.checkSign = function (ofpid, flightid) {
-
+         
         //console.log('check sign');
         flightService.getOFPCheckSign(ofpid).then(function (data) {
+           
             if (data && data.JLSignedBy) {
                 $scope.url_sign = signFiles + data.JLSignedBy + ".png";
 
                 $scope.PIC = data.PIC;
+                $scope.PIC_Lic = data.LicNo;
                 $scope.signDate = moment(new Date(data.JLDatePICApproved)).format('YYYY-MM-DD HH:mm');
-                $('#sig_pic_img').attr('src', $scope.url_sign);
+                //$('#sig_pic_img').attr('src', $scope.url_sign);
 
                 flightService.signOFPLocal(flightid, data);
             }
@@ -2078,11 +2119,14 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
             flightService.epGetOFPByFlight_B($scope.entity.FlightId).then(function (response2) {
                 $scope.isEditable = (diff <= 24);
+               
                 //console.log('OFP_B_ROOT', response2);
                 if (response2.Data.root && response2.Data.root.JLSignedBy) {
                     // $scope.isEditable = false;
+                    console.log('SIGN', response2.Data.root);
                     $scope.url_sign = signFiles + response2.Data.root.PICId + ".png";
-                    $scope.PIC = response2.Data.root.PIC;
+                    $scope.PIC = response2.Data.root.JLSignedBy;
+                    $scope.PIC_Lic = response2.Data.root.LicNo;
                     //alert(response.Data.JLDatePICApproved);
                     //console.log();
                     $scope.signDate = moment(new Date(response2.Data.root.JLDatePICApproved)).format('YYYY-MM-DD HH:mm');
@@ -2125,6 +2169,9 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
                             }
                             else {
+                                 
+                                  if (!$scope.url_sign)
+                                      $scope.checkSign($scope.entity.Id, $scope.entity.FlightId);
                                 ////// GET PROPS ///////////////
 
                                 //$scope.loadingVisible = true;

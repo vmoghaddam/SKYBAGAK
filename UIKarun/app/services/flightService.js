@@ -531,7 +531,7 @@ app.factory('flightService', ['$http', '$q', 'ngAuthSettings', '$rootScope', fun
 
     var _epGetFlightCommanders = function (flightId) {
         var deferred = $q.defer();
-        $http.get($rootScope.apiUrl + 'flight/commanders/' + flightId).then(function (response) {
+        $http.get(apiapsb + 'api/flight/commanders/' + flightId).then(function (response) {
 
             deferred.resolve(response.data);
 
@@ -712,6 +712,104 @@ app.factory('flightService', ['$http', '$q', 'ngAuthSettings', '$rootScope', fun
         return deferred.promise;
     };
     serviceFactory.signDocNew = _signDocNew;
+
+
+    var _signASRNew = function (entity) {
+        var deferred = $q.defer();
+
+        //$http.post($rootScope.apiUrl + 'flight/sign', entity).then(function (response) {
+        
+        $http.post(apiapsb + 'api/pic/asr/sign/new', entity).then(function (response) {
+
+            if (1==2)
+            $http.get('https://apimsg.apvaresh.com/api/qa/feedback/first/' + $rootScope.mobile + '/' + $rootScope.employeeId).then(function (xresponse) {
+                var followUpEntity = {};
+
+                followUpEntity.EntityId = response.data.Data.Id;
+                // alert(followUpEntity.EntityId);
+                followUpEntity.Type = 8;
+                followUpEntity.ReferrerId = -1;
+                followUpEntity.DateReferr = new Date();
+                followUpEntity.DateConfirmation = new Date();
+
+                $http.post('https://apiqa.apvaresh.ir' + '/api/save/followup', followUpEntity).then(function (responseq) {
+
+                    $http.get('https://apimsg.apvaresh.com/api/qa/notify/asr/' + response.data.Data.Id).then(function (yresponse) {
+
+                    }, function (err, status) {
+
+                    });
+
+                }, function (errq, status) {
+
+                });
+
+
+            }, function (err, status) {
+
+            });
+
+
+            deferred.resolve(response.data);
+        }, function (err, status) {
+
+            deferred.reject(Exceptions.getMessage(err));
+        });
+
+        return deferred.promise;
+    };
+    serviceFactory.signASRNew = _signASRNew;
+
+
+    var _signVRNew = function (entity) {
+        var deferred = $q.defer();
+
+        //$http.post($rootScope.apiUrl + 'flight/sign', entity).then(function (response) {
+        $http.post(apiapsb + 'api/pic/vr/sign/new', entity).then(function (response) {
+
+            if (1 == 2) {
+                $http.get('https://apimsg.apvaresh.com/api/qa/feedback/first/' + $rootScope.mobile + '/' + $rootScope.employeeId).then(function (xresponse) {
+                    var followUpEntity = {};
+
+                    followUpEntity.EntityId = response.data.Data.Id;
+
+                    followUpEntity.Type = 8;
+                    followUpEntity.ReferrerId = -1;
+                    followUpEntity.DateReferr = new Date();
+                    followUpEntity.DateConfirmation = new Date();
+
+                    $http.post('https://apiqa.apvaresh.ir' + '/api/save/followup', followUpEntity).then(function (responseq) {
+
+                        $http.get('https://apimsg.apvaresh.com/api/qa/notify/asr/' + response.data.Data.Id).then(function (yresponse) {
+
+                        }, function (err, status) {
+
+                        });
+
+                    }, function (errq, status) {
+
+                    });
+
+
+                }, function (err, status) {
+
+                });
+            }
+           
+
+
+            deferred.resolve(response.data);
+        }, function (err, status) {
+
+            deferred.reject(Exceptions.getMessage(err));
+        });
+
+        return deferred.promise;
+    };
+    serviceFactory.signVRNew = _signVRNew;
+
+
+
     //2023-12-09
     var _signDr = function (entity) {
         var deferred = $q.defer();
@@ -5288,7 +5386,7 @@ app.factory('flightService', ['$http', '$q', 'ngAuthSettings', '$rootScope', fun
     };
     serviceFactory.getJL = _getJL;
 
-    //12-04
+    //09-09
     var _getOFPCheckSign = function (ofpid) {
         // _api = 'http://fleet.caspianairlines.com/airpocketexternal/';
         var deferred = $q.defer();
@@ -5301,7 +5399,7 @@ app.factory('flightService', ['$http', '$q', 'ngAuthSettings', '$rootScope', fun
 
 
 
-                    $http.get(_api + "api/ofp/sign/check/" + ofpid /*'http://fleet.caspianairlines.com/airpocketexternal/api/jl/71952'*/).then(function (response) {
+                    $http.get(apiapsb + "api/ofp/sign/check/" + ofpid /*'http://fleet.caspianairlines.com/airpocketexternal/api/jl/71952'*/).then(function (response) {
                         deferred.resolve(response.data.Data);
                     }, function (err, status) {
 

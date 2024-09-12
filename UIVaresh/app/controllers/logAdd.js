@@ -4459,7 +4459,8 @@ app.controller('vrAddController', ['$scope', '$location', 'flightService', 'auth
 
             $scope.loadingVisible = false;
             var diff = Math.abs((new Date()).getTime() - (new Date(response.Data.STALocal)).getTime()) / 3600000;
-            $scope.isEditable = (diff <= 24);
+            $scope.isEditable = true;// (diff <= 24);
+            alert($scope.isEditable);
             $scope.flight = response.Data;
 
             $scope.loadingVisible = true;

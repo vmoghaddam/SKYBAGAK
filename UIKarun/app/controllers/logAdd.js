@@ -276,7 +276,7 @@ app.controller('logAddController', ['$scope', '$location', 'flightService', 'aut
                                     if ($scope.dto.BlockOffDate) {
 
                                         $scope.dto.BlockOffDateDt = nowstring;
-                                        $scope.dto.DelayBlockOff = getMinutesDiff($scope.entity.STD, $scope.blockOff);
+                                        $scope.dto.DelayBlockOff = getMinutesDiffNew($scope.entity.STD, $scope.blockOff, $scope.entity.STDDay);
                                     }
                                     else {
                                         alert('Error in converting BLOCKOFF date. Please report the error value to the application administrator. ERROR VALUE: ' + boffdt.err);
@@ -369,10 +369,10 @@ app.controller('logAddController', ['$scope', '$location', 'flightService', 'aut
                             }
 
                             if ($scope.blockOff && $scope.blockOn) {
-                                $scope.dto.BlockTime = getMinutesDiff($scope.blockOff, $scope.blockOn);
+                                $scope.dto.BlockTime = getMinutesDiffNew($scope.blockOff, $scope.blockOn, $scope.entity.STDDay);
                             }
                             if ($scope.takeOff && $scope.landing) {
-                                $scope.dto.FlightTime = getMinutesDiff($scope.takeOff, $scope.landing);
+                                $scope.dto.FlightTime = getMinutesDiffNew($scope.takeOff, $scope.landing, $scope.entity.STDDay);
                             }
                             //boz
                             //$scope.dto.FuelRemaining = $scope.entity.FuelRemaining;
@@ -826,10 +826,16 @@ app.controller('logAddController', ['$scope', '$location', 'flightService', 'aut
         onValueChanged: function (arg) {
              $scope._BlockTime=null;
                 if ($scope.blockOff && $scope.blockOn) {
-                     
-					$scope._BlockTime=getMinutesDiff($scope.blockOff, $scope.blockOn);
+                    
+                    $scope._BlockTime = getMinutesDiffNew($scope.blockOff, $scope.blockOn, $scope.entity.STDDay);
 					 
-                }
+            }
+            var diff =   getMinutesDiff2($scope.entity.STD, $scope.blockOff);
+            if (diff < -120)
+                $scope['blockOffD'] = '+D';
+            else 
+                $scope['blockOffD'] = 'D';
+
                 return;
              
             /////SAVE//////////////
@@ -848,11 +854,11 @@ app.controller('logAddController', ['$scope', '$location', 'flightService', 'aut
                     $scope.dto.BlockOffDateDt = nowstring;
                     $scope.dto.BlockOffDate = momentFromatFroServerUTC(CreateDate($scope.blockOff).combineDate(CreateDate($scope.entity.STDDay), $scope.blockOffD));
 
-                    $scope.dto.DelayBlockOff = getMinutesDiff($scope.entity.STD, $scope.blockOff);
+                    $scope.dto.DelayBlockOff = getMinutesDiffNew($scope.entity.STD, $scope.blockOff, $scope.entity.STDDay);
                 }
               
                 if ($scope.blockOff && $scope.blockOn) {
-                    $scope.dto.BlockTime = getMinutesDiff($scope.blockOff, $scope.blockOn);
+                    $scope.dto.BlockTime = getMinutesDiffNew($scope.blockOff, $scope.blockOn, $scope.entity.STDDay);
                 }
                 $scope.dto.JLDate = momentUtcNow();
 
@@ -891,11 +897,17 @@ app.controller('logAddController', ['$scope', '$location', 'flightService', 'aut
         interval: 15,
         onValueChanged: function (arg) {
 			$scope._BlockTime=null;
-                if ($scope.blockOff && $scope.blockOn) {
+            if ($scope.blockOff && $scope.blockOn) {
                      
-					$scope._BlockTime=getMinutesDiff($scope.blockOff, $scope.blockOn);
+                    $scope._BlockTime = getMinutesDiffNew($scope.blockOff, $scope.blockOn, $scope.entity.STDDay);
 					 
-                }
+            }
+            var diff = getMinutesDiff2($scope.entity.STD, $scope.blockOn);
+            if (diff < -120)
+                $scope['blockOnD'] = '+D';
+            else
+                $scope['blockOnD'] = 'D';
+
             return;
             /////SAVE//////////////
             try {
@@ -914,7 +926,7 @@ app.controller('logAddController', ['$scope', '$location', 'flightService', 'aut
 
                 }
                 if ($scope.blockOff && $scope.blockOn) {
-                    $scope.dto.BlockTime = getMinutesDiff($scope.blockOff, $scope.blockOn);
+                    $scope.dto.BlockTime = getMinutesDiffNew($scope.blockOff, $scope.blockOn, $scope.entity.STDDay);
                 }
                 $scope.dto.JLDate = momentUtcNow();
 
@@ -952,6 +964,11 @@ app.controller('logAddController', ['$scope', '$location', 'flightService', 'aut
 		showDropDownButton:false,
         interval: 15,
         onValueChanged: function (arg) {
+            var diff = getMinutesDiff2($scope.entity.STD, $scope.takeOff);
+            if (diff < -120)
+                $scope['takeOffD'] = '+D';
+            else
+                $scope['takeOffD'] = 'D';
             return;
             /////SAVE//////////////
             try {
@@ -970,7 +987,7 @@ app.controller('logAddController', ['$scope', '$location', 'flightService', 'aut
 
                 }
                 if ($scope.takeOff && $scope.landing) {
-                    $scope.dto.FlightTime = getMinutesDiff($scope.takeOff, $scope.landing);
+                    $scope.dto.FlightTime = getMinutesDiffNew($scope.takeOff, $scope.landing, $scope.entity.STDDay);
                 }
                 $scope.dto.JLDate = momentUtcNow();
 
@@ -1009,6 +1026,11 @@ app.controller('logAddController', ['$scope', '$location', 'flightService', 'aut
 		showDropDownButton:false,
         interval: 15,
         onValueChanged: function (arg) {
+            var diff = getMinutesDiff2($scope.entity.STD, $scope.landing);
+            if (diff < -120)
+                $scope['landingD'] = '+D';
+            else
+                $scope['landingD'] = 'D';
             return;
             /////SAVE//////////////
             try {
@@ -1027,7 +1049,7 @@ app.controller('logAddController', ['$scope', '$location', 'flightService', 'aut
 
                 }
                 if ($scope.takeOff && $scope.landing) {
-                    $scope.dto.FlightTime = getMinutesDiff($scope.takeOff, $scope.landing);
+                    $scope.dto.FlightTime = getMinutesDiffNew($scope.takeOff, $scope.landing, $scope.entity.STDDay);
                 }
                 $scope.dto.JLDate = momentUtcNow();
 
@@ -2534,6 +2556,7 @@ app.controller('logAddController', ['$scope', '$location', 'flightService', 'aut
     };
     ////////////////////////////////
     $scope.clickD = function (prm) {
+        return;
 
         switch ($scope[prm]) {
 
@@ -2557,7 +2580,8 @@ app.controller('logAddController', ['$scope', '$location', 'flightService', 'aut
 		var d=moment.utc().format('DD');
 		var h=moment.utc().format('HH');
 		var mm=moment.utc().format('mm');
-		$scope[des] =new Date(y,m,d,h,mm,0);
+        $scope[des] = new Date(y, m, d, h, mm, 0);
+        alert($scope[des]);
     };
     var _day = function (dt) {
         return (new Date(dt)).getDate();
@@ -4740,7 +4764,7 @@ $scope.frm_asr = false;
 
             $scope.loadingVisible = false;
             var diff = Math.abs((new Date()).getTime() - (new Date(response.Data.STALocal)).getTime()) / 3600000;
-            $scope.isEditable = (diff <= 24);
+            $scope.isEditable = true; //(diff <= 24);
             $scope.flight = response.Data;
 
             $scope.loadingVisible = true;
@@ -5503,10 +5527,10 @@ app.controller('drAddController', ['$scope', '$location', 'flightService', 'auth
 							General.ShowNotify("The 'Pilot Requested Fuel' field can not be empty.", 'error');
 							return;
 						}
-						if (!$scope.signed_by_dsp){
-							General.ShowNotify("The form has not been signed by a trusted dispatcher.", 'error');
-							return;
-						}
+						//if (!$scope.signed_by_dsp){
+						//	General.ShowNotify("The form has not been signed by a trusted dispatcher.", 'error');
+						//	return;
+						//}
                         if ($rootScope.getOnlineStatus()) {
                             $rootScope.checkInternet(function (st) {
                                 if (st) {

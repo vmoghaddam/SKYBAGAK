@@ -73,6 +73,68 @@ function getMinutesDiff(first, second) {
     var minutes = Math.floor((diff / 1000) / 60);
     return minutes;
 };
+
+function getMinutesDiff2(first, second) {
+    //var diff =  (new Date(second) - new Date(first));
+    //var minutes = Math.floor((diff / 1000) / 60);
+    //alert(minutes);
+    //return minutes;
+    if (!first || !second)
+        return 0;
+    var first_hh = (new Date(first)).getHours();
+    var first_mm = (new Date(first)).getMinutes();
+    var first_num = first_hh * 60 + first_mm;
+
+    var second_hh = (new Date(second)).getHours();
+    var second_mm = (new Date(second)).getMinutes();
+    var second_num = second_hh * 60 + second_mm;
+    //alert(second_num - first_num);
+    return second_num - first_num;
+
+};
+//09-09
+function getMinutesDiffNew(first, second,day) {
+    //return this.getFullYear() +
+    //    pad(this.getMonth() + 1) +
+    //    pad(this.getDate()) +
+    //    'T' +
+    //    pad(this.getHours()) +
+    //    pad(this.getMinutes()) +
+    //    pad(this.getSeconds()) +
+    //    'Z';
+    var dt_day =new Date( day);
+    var year = dt_day.getFullYear();
+    var month = dt_day.getMonth();
+    var day = dt_day.getDate();
+
+    var first_hh = (new Date(first)).getHours();
+    var first_mm = (new Date(first)).getMinutes();
+    var first_num = first_hh * 60 + first_mm;
+
+
+
+
+    var second_hh = (new Date(second)).getHours();
+    var second_mm = (new Date(second)).getMinutes();
+    var second_num = second_hh * 60 + second_mm;
+
+
+    var _first = new Date(year, month, day, first_hh, first_mm, 0);
+
+    var second_day = day;
+    if (first_num > second_num)
+        second_day = second_day + 1;
+    var _second = new Date(year, month, second_day, second_hh, second_mm, 0);
+
+
+
+
+    var diff = Math.abs(new Date(_second) - new Date(_first));
+    var minutes = Math.floor((diff / 1000) / 60);
+    return minutes;
+};
+
+
 function minutesToHourString(m) {
     return pad(Math.floor(m / 60)).toString() + ':' + pad(m % 60).toString();
 }
@@ -142,6 +204,7 @@ Date.prototype.combine = function (date,d) {
     prts.push(this.getMinutes());
     return prts.join('-');
 };
+//09-09
 Date.prototype.combineDate = function (date, d) {
 
     var prts = [];

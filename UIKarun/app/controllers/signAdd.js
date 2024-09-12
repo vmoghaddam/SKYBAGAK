@@ -37,7 +37,7 @@ app.controller('signAddController', ['$scope', '$location', 'flightService', 'au
         }
                         General.Confirm('Are you sure?', function (res) {
                             if (res) {
-                                
+                               
                                 if ($scope.documentType == 'jlog') {
                                     var dto = {
                                         flightId: $scope.tempData.FlightId.join('_'),
@@ -147,7 +147,8 @@ app.controller('signAddController', ['$scope', '$location', 'flightService', 'au
 										lic_no:$scope.sgn_lic,
 										
 									};
-									$scope.loadingVisible = true;
+                                    $scope.loadingVisible = true;
+                                    
                                     flightService.signASRNew(dto).then(function (response2) {
                                         $scope.loadingVisible = false;
                                         if (response2.IsSuccess) {
@@ -161,7 +162,29 @@ app.controller('signAddController', ['$scope', '$location', 'flightService', 'au
 
                                     }, function (err) { $scope.loadingVisible = false; General.ShowNotify(err.message, 'error'); });
 									
-								}
+                                }
+                                else if ($scope.documentType == 'vr') {
+                                    var dto = {
+                                        user_id: $rootScope.userId,
+                                        flight_id: $scope.entity.FlightId,
+                                        lic_no: $scope.sgn_lic,
+
+                                    };
+                                    $scope.loadingVisible = true;
+                                    flightService.signVRNew(dto).then(function (response2) {
+                                        $scope.loadingVisible = false;
+                                        if (response2.IsSuccess) {
+                                            General.ShowNotify(Config.Text_SavedOk, 'success');
+                                            response2.Data.doc = $scope.documentType;
+                                            $rootScope.$broadcast('onSign', response2.Data);
+                                            $scope.popup_add_visible = false;
+                                        }
+                                        else { General.ShowNotify(response2.message, 'error'); }
+
+
+                                    }, function (err) { $scope.loadingVisible = false; General.ShowNotify(err.message, 'error'); });
+
+                                }
                                 else {
                                     var dto = {
                                         flightId: $scope.entity.FlightId,
@@ -296,8 +319,8 @@ app.controller('signAddController', ['$scope', '$location', 'flightService', 'au
 
         $scope.entity.FlightId = $scope.tempData.FlightId;
         if ($scope.documentType == 'jlog' || $scope.documentType == 'ofpsall') {
-            fid = $scope.tempData.FlightId[0];
-            $scope.entity.FlightId = $scope.tempData.FlightId[0];
+            fid = $scope.tempData.FlightId.split('_')[0];
+            $scope.entity.FlightId = $scope.tempData.FlightId.split('_')[0];
         }
         
         $scope.loadingVisible = true;
@@ -306,9 +329,12 @@ app.controller('signAddController', ['$scope', '$location', 'flightService', 'au
 
             $scope.loadingVisible = false;
             if (response.IsSuccess && response.Data) {
-                console.log('commanders', response.Data);
-                $scope.commander = response.Data.commander;
+              
+                //console.log('commanders', response.Data);
+                $scope.commander = Enumerable.From(response.Data.commanders).Where(function (x) { return x.CrewId == $rootScope.employeeId; }).FirstOrDefault(); //response.Data.commander;
                 $scope.commanders = response.Data.commanders;
+                if (!$scope.commander)
+                    $scope.commander = $scope.commanders[0];
                 //$scope.url_sign = signFiles + $scope.commander.CrewId + ".jpg";
 				$scope.url_sign =$rootScope.is_sign_img_visible?  signFiles + $scope.commander.CrewId + ".jpg":null;
 
