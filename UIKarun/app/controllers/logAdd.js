@@ -2581,7 +2581,7 @@ app.controller('logAddController', ['$scope', '$location', 'flightService', 'aut
 		var h=moment.utc().format('HH');
 		var mm=moment.utc().format('mm');
         $scope[des] = new Date(y, m, d, h, mm, 0);
-        alert($scope[des]);
+        //alert($scope[des]);
     };
     var _day = function (dt) {
         return (new Date(dt)).getDate();

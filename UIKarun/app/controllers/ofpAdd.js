@@ -2058,7 +2058,7 @@ app.controller('ofpAddController', ['$scope', '$location', 'flightService', 'aut
 
         flightService.getLastMetar(stn).then(function (response) {
             var metar = response.Data.RawText;
-            var $elem = $('#' + _id);
+            var $elem = $('.' + _id);
             $elem.val(metar);
             $scope.onBlur(_id, metar, null);
         }, function (err) { });

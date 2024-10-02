@@ -170,7 +170,7 @@ namespace APCore.Services
 
 
                 var employee = await _context.ViewEmployees.FirstOrDefaultAsync(q => q.UserId == user.Id);
-                List<string> jobgroups = new List<string>() {"TRE","TRI","P1","P2" };
+                List<string> jobgroups = new List<string>() {"TRE","TRI","P1","P2","ISCCM","SCCM","CCM" };
                 if (jobgroups.IndexOf(employee.JobGroup) == -1) {
                     return new UserManagerResponse
                     {

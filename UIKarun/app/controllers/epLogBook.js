@@ -117,7 +117,7 @@ app.controller('epLogBookController', ['$scope', '$location', '$routeParams', '$
     };
     //  $scope.dt_from = new Date(2021,9, 28);
     //  $scope.dt_to = new Date(2021, 7, 26);
-    $scope.dt_from = (new Date()).addDays(-14);
+    $scope.dt_from = (new Date()).addDays(/*-14*/0);
     $scope.dt_to = (new Date($scope.dt_from)).addDays(0);
     $scope.date_from = {
         displayFormat: "yy MMM dd",
