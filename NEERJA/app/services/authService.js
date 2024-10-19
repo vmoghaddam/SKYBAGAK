@@ -127,7 +127,8 @@ app.factory('authService', ['$http', '$q', 'localStorageService', 'ngAuthSetting
             
             };
            
-            localStorageService.set('userData',ud );
+            localStorageService.set('userData', ud);
+            
 
             _authentication.isAuth = true;
             _authentication.userName = loginData.userName;

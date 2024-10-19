@@ -155,17 +155,41 @@ namespace NEERJACore.Controllers
             }
         }
 
+        public class dto_score
+        {
+            public int flight_id { get; set; }
+            public int? reporter_id { get; set; }
+            public string position { get; set; }
+            public string date_sign { get; set; }
+            public string remark { get; set; }
+            public int score { get; set; }
+            public int crew_id { get; set; }
+            public int item_id { get; set; }
+            public string title { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+        }
+        public class dto_evaluation
+        {
+            public int flight_id { get; set; }
+            public int reporter_id { get; set; }
 
+            public List<dto_score> scores { get; set; }
+
+        }
         [HttpPost]
         [Route("neerja/save/evaluation")]
-        public async Task<DataResponse> SaveEvaluation(dynamic dto)
+        public async Task<DataResponse> SaveEvaluation(dto_evaluation dto)
         {
             ppa_entities context = new ppa_entities();
 
-            int reporter_id = dto.reporter_id;
+            int? reporter_id = dto.reporter_id;
             int flight_id = dto.flight_id;
 
-            var form = context.neerja_evaluation_form.SingleOrDefault(q => q.flight_id == flight_id && q.reporter_id == reporter_id);
+            var form = await context.neerja_evaluation_form.SingleOrDefaultAsync(q =>
+                 //q.flight_id == flight_id && q.reporter_id == reporter_id
+                 q.flight_id == dto.flight_id && q.reporter_id == dto.reporter_id
+            );
 
             if (form == null)
             {
@@ -176,30 +200,41 @@ namespace NEERJACore.Controllers
             form.reporter_id = dto.reporter_id;
             form.flight_id = dto.flight_id;
 
-            context.SaveChanges();
+            var crew_item = dto.scores.Select(q => q.crew_id + "_" + q.item_id).ToList();
 
+
+            var scores = await context.neerja_evaluation_form_score.Where(q => crew_item.Contains(q.crew_id + "_" + q.item_id) && q.form_id == form.id).ToListAsync();
+            var ttt = new List<neerja_evaluation_form_score>();
             foreach (var row in dto.scores)
             {
 
                 int crew_id = row.crew_id;
                 int item_id = row.item_id;
 
-                var score = context.neerja_evaluation_form_score.SingleOrDefault(q => q.form_id == form.id && q.crew_id == crew_id && q.item_id == item_id);
+                var score = scores.FirstOrDefault(q => q.form_id == form.id && q.crew_id == crew_id && q.item_id == item_id);
+                //context.neerja_evaluation_form_score.SingleOrDefault(q => q.form_id == form.id && q.crew_id == crew_id && q.item_id == item_id);
                 if (score == null)
                 {
                     score = new neerja_evaluation_form_score();
-                    context.neerja_evaluation_form_score.Add(score);
+                    // context.neerja_evaluation_form_score.Add(score);
+                    form.neerja_evaluation_form_score.Add(score);
                 }
 
                 score.crew_id = row.crew_id;
                 score.item_id = row.item_id;
-                score.form_id = form.id;
+                //score.form_id = form.id;
+               // score.neerja_evaluation_form = form;
                 score.score = row.score;
+                
+
                 score.position = row.position;
 
+              
+             
 
             }
-            context.SaveChanges();
+
+            await context.SaveAsync();
 
 
             return new DataResponse()
